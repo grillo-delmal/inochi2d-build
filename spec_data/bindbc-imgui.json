@@ -27,8 +27,8 @@
         "rm -f .gitmodules",
         "cat > .gitmodules <<EOF",
         "[submodule \"deps/cimgui\"]",
-        "   path = deps/cimgui",
-        "   url = https://github.com/Inochi2D/cimgui.git",
+        "\tpath = deps/cimgui",
+        "\turl = https://github.com/Inochi2D/cimgui.git",
         "EOF",
         "mkdir -p deps/cimgui/.git",
         ""
