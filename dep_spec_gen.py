@@ -50,6 +50,9 @@ def find_deps(parent, dep_graph):
 deps = list(find_deps("inochi-creator", dep_graph))
 deps.sort()
 
+for dep in dep_graph["inochi-creator"]['dependencies']:
+    print("BuildRequires:  zdub-%s-static" % dep)
+
 #print('# Project maintained deps')
 project_deps = {
     name: dep_graph[name] 
@@ -138,7 +141,6 @@ for name in pd_names:
                 "https://github.com/Inochi2D/imgui/archive/%{imgui_commit}/imgui-%{imgui_short}.tar.gz"
             ]
         }
-
     spec_gen(
         "build_out/zdub/zdub-%s/zdub-%s.spec" % (name, name),
         name, 
@@ -146,7 +148,11 @@ for name in pd_names:
         SEMVER, 
         GITDIST,
         COMMIT, 
-        project_deps[name]['dependencies'],
+        list(
+            { 
+                dep.split(':')[0] 
+                    for dep in project_deps[name]['dependencies']
+            }),
         spec_data)
 
 #print('# Indirect deps')
@@ -217,6 +223,10 @@ for name in true_deps:
         SEMVER, 
         0,
         "0000000", 
-        list(id_deps),
+        list(
+            { 
+                dep.split(':')[0] 
+                    for dep in list(id_deps)
+            }),
         spec_data)
 
