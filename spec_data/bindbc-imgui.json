@@ -21,6 +21,7 @@
         "rm -rf deps/glbinding",
         "rm -rf deps/glfw",
         "rm -rf deps/SDL",
+        "rm -rf deps/cimgui/imgui/examples/",
         "",
         "# FIX: Make bindbc-imgui submodule checking only check cimgui",
         "rm -f .gitmodules",

@@ -5,6 +5,7 @@
     "prep_file": "vibe.d-%{lib_gitver}",
     "prep":[
         "mv LICENSE.txt LICENSE",
+        "rm -rf lib",
         ""
     ]
 }
