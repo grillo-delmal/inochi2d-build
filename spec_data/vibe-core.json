@@ -1,4 +1,5 @@
 {
+    "url": "https://github.com/vibe-d/vibe-core",
     "sources": ["https://github.com/vibe-d/vibe-core/archive/refs/tags/v%{lib_gitver}/vibe-core-%{lib_gitver}.tar.gz"],
     "prep":[
         "mv LICENSE.txt LICENSE",

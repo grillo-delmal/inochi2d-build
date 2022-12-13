@@ -1,3 +1,4 @@
 {
+    "url": "https://github.com/trishume/ddbus",
     "sources": ["https://github.com/trishume/ddbus/archive/refs/tags/v%{lib_gitver}/ddbus-%{lib_gitver}.tar.gz"]
 }

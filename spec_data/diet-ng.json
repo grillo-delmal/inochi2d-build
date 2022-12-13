@@ -1,4 +1,5 @@
 {
+    "url": "https://github.com/rejectedsoftware/diet-ng",
     "sources": ["https://github.com/rejectedsoftware/diet-ng/archive/v%{lib_gitver}/diet-ng-%{lib_gitver}.tar.gz"],
     "prep":[
         "mv LICENSE.txt LICENSE",

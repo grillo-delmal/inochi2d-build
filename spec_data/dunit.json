@@ -1,3 +1,4 @@
 {
+    "url": "https://github.com/nomad-software/dunit",
     "sources":["https://github.com/nomad-software/dunit/archive/refs/tags/v%{lib_gitver}/dunit-%{lib_gitver}.tar.gz"]
 }

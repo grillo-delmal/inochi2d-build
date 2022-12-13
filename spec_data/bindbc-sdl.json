@@ -1,4 +1,5 @@
 {
+    "url": "https://github.com/BindBC/bindbc-sdl",
     "sources":["https://github.com/BindBC/bindbc-sdl/archive/refs/tags/v%{lib_gitver}/bindbc-sdl-%{lib_gitver}.tar.gz"],
     "prep":[
         "mv LICENSE_1_0.txt LICENSE",

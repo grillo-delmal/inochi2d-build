@@ -1,4 +1,5 @@
 {
+    "url": "https://github.com/vibe-d/eventcore",
     "sources":["https://github.com/vibe-d/eventcore/archive/refs/tags/v%{lib_gitver}/eventcore-%{lib_gitver}.tar.gz"],
     "prep":[
         "mv LICENSE.txt LICENSE",

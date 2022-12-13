@@ -8,20 +8,21 @@ def spec_gen(path, name, gitver, semver, dist, commit, deps, data={}):
             "%define __strip /bin/true",
             "%define __brp_mangle_shebangs /bin/true",
             "",
-            "%%define lib_name   %s" % name,
-            "%%define lib_ver %s" % gitver.split("-")[0],
-            "%%define lib_gitver %s" % gitver,
-            "%%define lib_semver %s" % semver,
-            "%%define lib_dist   %s" % dist,
-            "%%define lib_commit %s" % commit,
-            "%%define lib_short  %s" % commit[:7],
+            "%%define lib_name      %s" % name,
+            "%%define lib_ver       %s" % gitver.split("-")[0],
+            "%%define lib_gitver    %s" % gitver,
+            "%%define lib_semver    %s" % semver,
+            "%%define lib_dist      %s" % dist,
+            "%%define lib_commit    %s" % commit,
+            "%%define lib_short     %s" % commit[:7],
             ""
         ]))
         if "vars" in data:
             for key in data["vars"].keys():
                 f.write('\n'.join([
-                    "%%define %s %s" % (
+                    "%%define %s%s %s" % (
                         key,
+                        " " * (13-len(key)),
                         data["vars"][key]) ,
                     ""
                 ]))
@@ -38,7 +39,7 @@ def spec_gen(path, name, gitver, semver, dist, commit, deps, data={}):
             "Summary:        %s" % (data["summary"] if "summary" in data else "%{lib_name} library for D"),
             "Group:          Development/Libraries",
             "License:        %s" % (data["license"] if "license" in data else "BSD"),
-            "URL:            https://github.com/Inochi2D/%{lib_name}",
+            "URL:            %s" % (data["url"] if "url" in data else "https://github.com/Inochi2D/%{lib_name}"),
             ""
         ]))
         ## SOURCES AND PATCHES
