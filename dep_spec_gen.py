@@ -2,9 +2,10 @@
 
 import json
 import subprocess
-from pathlib import Path
-from spec_gen import spec_gen
 import shutil
+
+from pathlib import Path
+from scripts.spec_gen import spec_gen
 
 f = open("build_out/describe")
 
