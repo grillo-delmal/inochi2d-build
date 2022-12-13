@@ -1,9 +1,10 @@
 {
-    "macros": [
-        "%define __brp_mangle_shebangs /bin/true",
-        ""
-    ],
     "license": "BSL-1.0",
     "url": "https://github.com/libmir/mir-linux-kernel",
-    "sources": ["https://github.com/libmir/mir-linux-kernel/archive/refs/tags/v%{lib_gitver}/mir-linux-kernel-%{lib_gitver}.tar.gz"]
+    "sources": ["https://github.com/libmir/mir-linux-kernel/archive/refs/tags/v%{lib_gitver}/mir-linux-kernel-%{lib_gitver}.tar.gz"],
+    "prep" : [
+        "# This file generates warnings because of the shebangs.",
+        "rm ./get_syscalls.py",
+        ""
+    ]
 }
