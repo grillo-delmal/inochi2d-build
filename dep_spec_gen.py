@@ -7,39 +7,13 @@ import shutil
 from pathlib import Path
 from scripts.spec_gen import spec_gen
 
-f = open("build_out/describe")
-
-data = json.load(f)
+data = {}
+with open("build_out/describe") as f:
+    data = json.load(f)
 
 dep_graph = {
     package['name']: package 
         for package in data['packages'] }
-
-SEMVER = subprocess.run(
-    ['bash', '-c', 
-        'source ./scripts/semver.sh;' + \
-        'semver ./src/inochi-creator'],
-    stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-COMMIT = subprocess.run(
-    'git -C ./src/inochi-creator rev-parse HEAD'.split(),
-    stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-GITVER = subprocess.run(
-    ['bash', '-c', 
-        'source ./scripts/gitver.sh;' + \
-        'git_version ./src/inochi-creator'],
-    stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-GITDIST = subprocess.run(
-    ['bash', '-c', 
-        'source ./scripts/gitver.sh;' + \
-        'git_build ./src/inochi-creator'],
-    stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-
-print("%define inochi_creator_ver", GITVER)
-print("%define inochi_creator_semver", SEMVER)
-print("%define inochi_creator_dist", GITDIST)
-print("%define inochi_creator_commit", COMMIT)
-print("%define inochi_creator_short", COMMIT[:7])
-print()
 
 def find_deps(parent, dep_graph):
     deps = set(dep_graph[parent]['dependencies'])
@@ -50,10 +24,6 @@ def find_deps(parent, dep_graph):
 deps = list(find_deps("inochi-creator", dep_graph))
 deps.sort()
 
-for dep in dep_graph["inochi-creator"]['dependencies']:
-    print("BuildRequires:  zdub-%s-static" % dep)
-
-#print('# Project maintained deps')
 project_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
@@ -64,98 +34,9 @@ project_deps = {
 pd_names = list(project_deps.keys())
 pd_names.sort()
 
-for name in pd_names:
-    NAME = project_deps[name]['name'].replace('-', '_').lower()
-    SEMVER = project_deps[name]['version']
-    GITPATH = project_deps[name]['path'].replace("/opt","./")
-    COMMIT = subprocess.run(
-        ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
-        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-    GITVER = subprocess.run(
-        ['bash', '-c', 
-            'source ./scripts/gitver.sh;' + \
-            'git_version ' + GITPATH],
-        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-    GITDIST = subprocess.run(
-        ['bash', '-c', 
-            'source ./scripts/gitver.sh;' + \
-            'git_build ' + GITPATH],
-        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
 
-    Path("build_out/zdub/zdub-%s"  % name).mkdir(parents=True, exist_ok=True)
-
-    for file in Path("files/%s" % name).glob("**/*"):
-        if file.is_file():
-            shutil.copy(file, "build_out/zdub/zdub-%s/" % name)
-
-    for file in Path("patches/%s" % name).glob("*.patch"):
-        shutil.copy(file, "build_out/zdub/zdub-%s/" % name)
-
-    spec_data = {}
-    try:
-        with open("spec_data/%s.json" % name) as f:
-            spec_data = json.load(f)
-    except FileNotFoundError:
-        pass
-    
-    if Path("patches/%s" % name).exists():
-        spec_data = spec_data | {
-            "patches": [
-                file.name 
-                for file in Path("patches/%s" % name).glob("*.patch")]}
-
-    if Path("files/%s" % name).exists():
-        spec_data = spec_data | {
-            "file_sources": [
-                {
-                    "name": file.name, 
-                    "path": str(file.relative_to("files/%s" % name).parent)} 
-                for file in Path("files/%s" % name).glob("**/*") 
-                if file.is_file()]}
-
-    if name == "bindbc-imgui":
-        # add imgui deps
-
-        NAME = 'cimgui'
-        CIMGUI_GITPATH = './src/bindbc-imgui/deps/cimgui'
-        CIMGUI_COMMIT = subprocess.run(
-            ['git', '-C', CIMGUI_GITPATH, 'rev-parse', 'HEAD'],
-            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-
-        NAME = 'imgui'
-        IMGUI_GITPATH = './src/bindbc-imgui/deps/cimgui/imgui'
-        IMGUI_COMMIT = subprocess.run(
-            ['git', '-C', IMGUI_GITPATH, 'rev-parse', 'HEAD'],
-            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-
-        spec_data = spec_data | {
-            "vars": {
-                "cimgui_commit": CIMGUI_COMMIT,
-                "cimgui_short": CIMGUI_COMMIT[:7],
-                "imgui_commit": IMGUI_COMMIT,
-                "imgui_short": IMGUI_COMMIT[:7]
-            },
-            "sources" : [
-                "https://github.com/Inochi2D/bindbc-imgui/archive/%{lib_commit}/bindbc-imgui-%{lib_short}.tar.gz",
-                "https://github.com/Inochi2D/cimgui/archive/%{cimgui_commit}/cimgui-%{cimgui_short}.tar.gz",
-                "https://github.com/Inochi2D/imgui/archive/%{imgui_commit}/imgui-%{imgui_short}.tar.gz"
-            ]
-        }
-    spec_gen(
-        "build_out/zdub/zdub-%s/zdub-%s.spec" % (name, name),
-        name, 
-        GITVER, 
-        SEMVER, 
-        GITDIST,
-        COMMIT, 
-        list(
-            { 
-                dep.split(':')[0] 
-                    for dep in project_deps[name]['dependencies']
-            }),
-        spec_data)
-
-#print('# Indirect deps')
+# Write indirect deps spec files
+indirect_build_reqs = []
 indirect_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
@@ -230,3 +111,97 @@ for name in true_deps:
             }),
         spec_data)
 
+    indirect_build_reqs.append(
+        "BuildRequires:  zdub-%s-static" % name)
+
+indirect_build_reqs.append("")
+
+# Write inochi-creator.spec
+
+with open("build_out/inochi-creator.spec", 'w') as spec:
+
+    SEMVER = subprocess.run(
+        ['bash', '-c', 
+            'source ./scripts/semver.sh;' + \
+            'semver ./src/inochi-creator'],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    COMMIT = subprocess.run(
+        'git -C ./src/inochi-creator rev-parse HEAD'.split(),
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    GITVER = subprocess.run(
+        ['bash', '-c', 
+            'source ./scripts/gitver.sh;' + \
+            'git_version ./src/inochi-creator'],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    GITDIST = subprocess.run(
+        ['bash', '-c', 
+            'source ./scripts/gitver.sh;' + \
+            'git_build ./src/inochi-creator'],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+
+    spec.write('\n'.join([
+        "%%define inochi_creator_ver    %s" % GITVER,
+        "%%define inochi_creator_semver %s" % SEMVER,
+        "%%define inochi_creator_dist   %s" % GITDIST,
+        "%%define inochi_creator_commit %s" % COMMIT,
+        "%%define inochi_creator_short  %s" % COMMIT[:7],
+        "",
+        ""]))
+
+    spec.write('\n'.join([
+        '# Project maintained deps',
+        "",
+        ""]))
+
+    for name in pd_names:
+        NAME = project_deps[name]['name'].replace('-', '_').lower()
+        SEMVER = project_deps[name]['version']
+        GITPATH = project_deps[name]['path'].replace("/opt","./")
+        COMMIT = subprocess.run(
+            ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
+            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        GITVER = subprocess.run(
+            ['bash', '-c', 
+                'source ./scripts/gitver.sh;' + \
+                'git_version ' + GITPATH],
+            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        GITDIST = subprocess.run(
+            ['bash', '-c', 
+                'source ./scripts/gitver.sh;' + \
+                'git_build ' + GITPATH],
+            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+
+        spec.write('\n'.join([
+            "%%define %s_semver %s" % (NAME, SEMVER),
+            "%%define %s_commit %s" % (NAME, COMMIT),
+            "%%define %s_short  %s" % (NAME, COMMIT[:7]),
+            "",
+            ""]))
+
+    spec.write('\n'.join([
+        '# cimgui', 
+        "",
+        ""]))
+
+    NAME = 'cimgui'
+    GITPATH = './src/bindbc-imgui/deps/cimgui'
+    COMMIT = subprocess.run(
+        ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    spec.write('\n'.join([
+        "%%define %s_commit %s" % (NAME, COMMIT),
+        "%%define %s_short  %s" % (NAME, COMMIT[:7]),
+        ""]))
+
+    NAME = 'imgui'
+    GITPATH = './src/bindbc-imgui/deps/cimgui/imgui'
+    COMMIT = subprocess.run(
+        ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    spec.write('\n'.join([
+        "%%define %s_commit %s" % (NAME, COMMIT),
+        "%%define %s_short  %s" % (NAME, COMMIT[:7]),
+        "",
+        ""]))
+
+    spec.write('\n'.join(indirect_build_reqs))
