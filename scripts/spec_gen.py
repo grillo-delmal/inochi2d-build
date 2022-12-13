@@ -1,6 +1,28 @@
 import math
+import json
+from pathlib import Path
 
-def spec_gen(path, name, gitver, semver, dist, commit, deps, data={}):
+def spec_get_data(name):
+    spec_data = {}
+    try:
+        with open("spec_data/%s.json" % name) as f:
+            spec_data = json.load(f)
+    except FileNotFoundError:
+        pass
+
+    if Path("files/%s" % name).exists():
+        spec_data = spec_data | {
+            "file_sources": [
+                {
+                    "name": file.name, 
+                    "path": str(file.relative_to("files/%s" % name).parent)} 
+                for file in Path("files/%s" % name).glob("**/*") 
+                if file.is_file()]}
+    return spec_data
+
+
+def spec_gen(path, name, gitver, semver, dist, commit, deps):
+    data = spec_get_data(name)
 
     with open(path, 'w') as f:
 
