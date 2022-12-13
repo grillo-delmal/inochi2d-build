@@ -102,7 +102,7 @@ for name in pd_names:
 
     if Path("files/%s" % name).exists():
         spec_data = spec_data | {
-            "files": [
+            "file_sources": [
                 {
                     "name": file.name, 
                     "path": str(file.relative_to("files/%s" % name).parent)} 
@@ -187,7 +187,7 @@ for name in true_deps:
 
     if Path("files/%s" % name).exists():
         spec_data = spec_data | {
-            "files": [
+            "file_sources": [
                 {
                     "name": file.name, 
                     "path": str(file.relative_to("files/%s" % name).parent)} 

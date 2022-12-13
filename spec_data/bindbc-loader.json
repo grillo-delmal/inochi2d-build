@@ -1,4 +1,5 @@
 {
+    "license": "BSL-1.0",
     "url": "https://github.com/BindBC/bindbc-loader",
     "sources":["https://github.com/BindBC/bindbc-loader/archive/refs/tags/v%{lib_gitver}/bindbc-loader-%{lib_gitver}.tar.gz"],
     "prep":[

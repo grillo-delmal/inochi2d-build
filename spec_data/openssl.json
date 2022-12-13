@@ -1,4 +1,5 @@
 {
+    "license": "OpenSSL",
     "url": "https://github.com/D-Programming-Deimos/openssl",
     "sources":["https://github.com/D-Programming-Deimos/openssl/archive/refs/tags/v%{lib_gitver}/openssl-%{lib_gitver}.tar.gz"]
 }

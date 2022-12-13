@@ -1,4 +1,5 @@
 {
+    "license": "Apache-2.0",
     "url": "https://github.com/libmir/mir-algorithm",
     "sources":["https://github.com/libmir/mir-algorithm/archive/refs/tags/v%{lib_gitver}/mir-algorithm-%{lib_gitver}.tar.gz"]
 }

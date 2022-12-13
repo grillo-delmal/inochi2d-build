@@ -38,7 +38,7 @@ def spec_gen(path, name, gitver, semver, dist, commit, deps, data={}):
             "Release:        %autorelease",
             "Summary:        %s" % (data["summary"] if "summary" in data else "%{lib_name} library for D"),
             "Group:          Development/Libraries",
-            "License:        %s" % (data["license"] if "license" in data else "BSD"),
+            "License:        %s" % (data["license"] if "license" in data else "BSD-2-Clause"),
             "URL:            %s" % (data["url"] if "url" in data else "https://github.com/Inochi2D/%{lib_name}"),
             ""
         ]))
@@ -66,14 +66,14 @@ def spec_gen(path, name, gitver, semver, dist, commit, deps, data={}):
                     ""
                 ]))
 
-        if "files" in data and len(data["files"]) > 0:
+        if "file_sources" in data and len(data["file_sources"]) > 0:
             src_cnt = len(data["sources"]) if "sources" in data and len(data["sources"]) else 1
-            for i in range(len(data["files"])):
+            for i in range(len(data["file_sources"])):
                 f.write('\n'.join([
                     "Source%d:%s%s" % (
                         src_cnt + i, 
                         " " * (8 - math.floor(math.log10(i) if i > 0 else 0)), 
-                        data["files"][i]["name"]) ,
+                        data["file_sources"][i]["name"]) ,
                     ""
                 ]))
 
@@ -166,14 +166,14 @@ def spec_gen(path, name, gitver, semver, dist, commit, deps, data={}):
             "setgittag --rm -f -m v%{lib_gitver}",
             ""
         ]))
-        if "files" in data and len(data["files"]) > 0:
+        if "file_sources" in data and len(data["file_sources"]) > 0:
             f.write("\n")
             src_cnt = len(data["sources"]) if "sources" in data and len(data["sources"]) else 1
-            for i in range(len(data["files"])):
-                if data["files"][i]["path"] != ".":
+            for i in range(len(data["file_sources"])):
+                if data["file_sources"][i]["path"] != ".":
                     f.write('\n'.join([
-                        "mkdir -p ./%s" % data["files"][i]["path"],
-                        "cp --force %%{SOURCE%d} ./%s/" % (i + src_cnt, data["files"][i]["path"]),
+                        "mkdir -p ./%s" % data["file_sources"][i]["path"],
+                        "cp --force %%{SOURCE%d} ./%s/" % (i + src_cnt, data["file_sources"][i]["path"]),
                         ""
                     ]))
                 else:
@@ -205,6 +205,11 @@ def spec_gen(path, name, gitver, semver, dist, commit, deps, data={}):
             "%files devel",
             "%license LICENSE",
             "%{_includedir}/zdub/%{lib_name}-%{lib_gitver}/%{lib_name}/",
+            ""
+        ]))
+        if "files" in data and len(data["files"]) > 0:
+            f.write('\n'.join(data["files"]))
+        f.write('\n'.join([
             "",
             "",
             "%changelog",

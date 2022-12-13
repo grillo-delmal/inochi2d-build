@@ -1,4 +1,5 @@
 {
+    "license": "ISC",
     "url": "https://gitlab.com/AntonMeep/silly",
     "sources": ["https://gitlab.com/AntonMeep/silly/-/archive/v%{lib_gitver}/silly-v%{lib_gitver}.tar.gz"],
     "prep_file": "silly-v%{lib_gitver}"
