@@ -1,0 +1,34 @@
+{
+    "requires" : [
+        "cmake",
+        "gcc",
+        "gcc-c++",
+        "freetype-devel",
+        "SDL2-devel"
+    ],
+    "prep" : [
+        "# cimgui",
+        "tar -xzf %{SOURCE1}",
+        "rm -rf deps/cimgui",
+        "mv cimgui-%{cimgui_commit} deps/cimgui",
+        "",
+        "tar -xzf %{SOURCE2}",
+        "rm -rf deps/cimgui/imgui",
+        "mv imgui-%{imgui_commit} deps/cimgui/imgui",
+        "",
+        "rm -rf deps/freetype",
+        "rm -rf deps/glbinding",
+        "rm -rf deps/glfw",
+        "rm -rf deps/SDL",
+        "",
+        "# FIX: Make bindbc-imgui submodule checking only check cimgui",
+        "rm -f .gitmodules",
+        "cat > .gitmodules <<EOF",
+        "[submodule \"deps/cimgui\"]",
+        "   path = deps/cimgui",
+        "   url = https://github.com/Inochi2D/cimgui.git",
+        "EOF",
+        "mkdir -p deps/cimgui/.git",
+        ""
+    ]
+}

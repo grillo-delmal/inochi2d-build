@@ -2,6 +2,9 @@
 
 import json
 import subprocess
+from pathlib import Path
+from spec_gen import spec_gen
+import shutil
 
 f = open("build_out/describe")
 
@@ -46,7 +49,7 @@ def find_deps(parent, dep_graph):
 deps = list(find_deps("inochi-creator", dep_graph))
 deps.sort()
 
-print('# Project maintained deps')
+#print('# Project maintained deps')
 project_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
@@ -65,15 +68,87 @@ for name in pd_names:
         ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
     GITVER = subprocess.run(
-        ['git', '-C', GITPATH, 'describe', '--tags'],
+        ['bash', '-c', 
+            'source ./scripts/gitver.sh;' + \
+            'git_version ' + GITPATH],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    GITDIST = subprocess.run(
+        ['bash', '-c', 
+            'source ./scripts/gitver.sh;' + \
+            'git_build ' + GITPATH],
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
 
-    print("%define", "%s_semver" % NAME, SEMVER)
-    print("%define", "%s_commit" % NAME, COMMIT)
-    print("%define", "%s_short" % NAME, COMMIT[:7])
-    print("")
+    Path("build_out/zdub/zdub-%s"  % name).mkdir(parents=True, exist_ok=True)
 
-print('# Indirect deps')
+    for file in Path("files/%s" % name).glob("**/*"):
+        if file.is_file():
+            shutil.copy(file, "build_out/zdub/zdub-%s/" % name)
+
+    for file in Path("patches/%s" % name).glob("*.patch"):
+        shutil.copy(file, "build_out/zdub/zdub-%s/" % name)
+
+    spec_data = {}
+    try:
+        with open("spec_data/%s.json" % name) as f:
+            spec_data = json.load(f)
+    except FileNotFoundError:
+        pass
+    
+    if Path("patches/%s" % name).exists():
+        spec_data = spec_data | {
+            "patches": [
+                file.name 
+                for file in Path("patches/%s" % name).glob("*.patch")]}
+
+    if Path("files/%s" % name).exists():
+        spec_data = spec_data | {
+            "files": [
+                {
+                    "name": file.name, 
+                    "path": str(file.relative_to("files/%s" % name).parent)} 
+                for file in Path("files/%s" % name).glob("**/*") 
+                if file.is_file()]}
+
+    if name == "bindbc-imgui":
+        # add imgui deps
+
+        NAME = 'cimgui'
+        CIMGUI_GITPATH = './src/bindbc-imgui/deps/cimgui'
+        CIMGUI_COMMIT = subprocess.run(
+            ['git', '-C', CIMGUI_GITPATH, 'rev-parse', 'HEAD'],
+            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+
+        NAME = 'imgui'
+        IMGUI_GITPATH = './src/bindbc-imgui/deps/cimgui/imgui'
+        IMGUI_COMMIT = subprocess.run(
+            ['git', '-C', IMGUI_GITPATH, 'rev-parse', 'HEAD'],
+            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+
+        spec_data = spec_data | {
+            "vars": {
+                "cimgui_commit": CIMGUI_COMMIT,
+                "cimgui_short": CIMGUI_COMMIT[:7],
+                "imgui_commit": IMGUI_COMMIT,
+                "imgui_short": IMGUI_COMMIT[:7]
+            },
+            "sources" : [
+                "https://github.com/Inochi2D/bindbc-imgui/archive/%{lib_commit}/bindbc-imgui-%{lib_short}.tar.gz",
+                "https://github.com/Inochi2D/cimgui/archive/%{cimgui_commit}/cimgui-%{cimgui_short}.tar.gz",
+                "https://github.com/Inochi2D/imgui/archive/%{imgui_commit}/imgui-%{imgui_short}.tar.gz"
+            ]
+        }
+
+    spec_gen(
+        "build_out/zdub/zdub-%s/zdub-%s.spec" % (name, name),
+        name, 
+        GITVER, 
+        SEMVER, 
+        GITDIST,
+        COMMIT, 
+        project_deps[name]['dependencies'],
+        spec_data)
+
+#print('# Indirect deps')
 indirect_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
@@ -84,34 +159,63 @@ indirect_deps = {
 id_names = list(indirect_deps.keys())
 id_names.sort()
 
-already_there = []
+true_deps = {}
 
 for name in id_names:
-    NAME = indirect_deps[name]['name'].replace('-', '_').lower().split(":")[0]
+    NAME = indirect_deps[name]['name'].lower()
+    TRUENAME = NAME.split(":")[0]
     SEMVER = indirect_deps[name]['version']
 
-    if (NAME, SEMVER) in already_there:
-        continue
-    already_there.append((NAME, SEMVER))
+    if TRUENAME in true_deps:
+        true_deps[TRUENAME].append({"name": NAME, "semver":SEMVER})
+    else:
+        true_deps[TRUENAME] = [{"name": NAME, "semver":SEMVER}]
 
-    print("%define", "%s_ver" % NAME, SEMVER)
-print()
+for name in true_deps:
 
-print('# cimgui') 
+    Path("build_out/zdub/zdub-%s"  % name).mkdir(parents=True, exist_ok=True)
+    for file in Path("files/%s" % name).glob("**/*"):
+        if file.is_file():
+            shutil.copy(file, "build_out/zdub/zdub-%s/" % name)
 
-NAME = 'cimgui'
-GITPATH = './src/bindbc-imgui/deps/cimgui'
-COMMIT = subprocess.run(
-    ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
-    stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-print("%define", "%s_commit" % NAME, COMMIT)
-print("%define", "%s_short" % NAME, COMMIT[:7])
+    spec_data = {}
+    try:
+        with open("spec_data/%s.json" % name) as f:
+            spec_data = json.load(f)
+    except FileNotFoundError:
+        pass
 
-NAME = 'imgui'
-GITPATH = './src/bindbc-imgui/deps/cimgui/imgui'
-COMMIT = subprocess.run(
-    ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
-    stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-print("%define", "%s_commit" % NAME, COMMIT)
-print("%define", "%s_short" % NAME, COMMIT[:7])
+    if Path("files/%s" % name).exists():
+        spec_data = spec_data | {
+            "files": [
+                {
+                    "name": file.name, 
+                    "path": str(file.relative_to("files/%s" % name).parent)} 
+                for file in Path("files/%s" % name).glob("**/*") 
+                if file.is_file()]}
+
+    id_deps = set()
+    SEMVER = true_deps[name][0]["semver"]
+
+    for dep in true_deps[name]:
+        id_deps = id_deps.union(set(dep_graph[dep["name"]]['dependencies']))
+        SEMVER = dep["semver"]
+        pass
+
+    for dep in list(id_deps):
+        dep_truename = dep.split(":")[0]
+        if dep_truename != dep:
+            id_deps.remove(dep)
+            if dep_truename != name:
+                id_deps.add(dep_truename)
+        
+    spec_gen(
+        "build_out/zdub/zdub-%s/zdub-%s.spec" % (name, name),
+        name, 
+        SEMVER, 
+        SEMVER, 
+        0,
+        "0000000", 
+        list(id_deps),
+        spec_data)
 

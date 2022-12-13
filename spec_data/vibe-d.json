@@ -1,0 +1,8 @@
+{
+    "sources": ["https://github.com/vibe-d/vibe.d/archive/refs/tags/v%{lib_gitver}/vibe-d-%{lib_gitver}.tar.gz"],
+    "prep_file": "vibe.d-%{lib_gitver}",
+    "prep":[
+        "mv LICENSE.txt LICENSE",
+        ""
+    ]
+}

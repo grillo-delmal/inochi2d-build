@@ -31,6 +31,19 @@ for d in */ ; do
 done
 popd
 
+pushd files
+for d in */ ; do
+    pushd $d
+    for p in $(find . -type f); do
+        if [ -f "/opt/files/$d$p" ]; then
+            mkdir -p "/opt/src/$(dirname $p)"
+            cp --force "/opt/files/$d$p" "/opt/src/$(dirname $p)"
+        fi
+    done
+    popd
+done
+popd
+
 cat > /opt/src/inochi-creator/source/creator/ver.d <<EOF
 module creator.ver;
 
@@ -88,7 +101,11 @@ pushd inochi-creator
 
 # Remove branding assets
 rm -rf res/Inochi-Creator.iconset/
-find res/ui/ -type f -not -name "grid.png" -delete
+find res/ui/ \
+    -type f \
+    -not -name "grid.png" \
+    -not -name "banner.png" \
+    -delete
 rm res/icon.png
 rm res/Info.plist
 rm res/logo.png
@@ -98,10 +115,6 @@ rm res/inochi-creator.rc
 rm res/shaders/ada.frag
 rm res/shaders/ada.vert
 
-# Replace files
-rm source/creator/config.d
-cp /opt/files/config.d source/creator/
-cp /opt/files/empty.png res/ui/banner.png
 
 if [[ ! -z ${DEBUG} ]]; then
     export DFLAGS='-g --d-debug'
@@ -111,6 +124,7 @@ echo "Download time" > /opt/out/stats
 { time \
     dub describe \
         --config=barebones \
+        --override-config=facetrack-d/web-adaptors \
         --cache=local \
             2>&1 > /opt/out/describe ; \
     }  2>> /opt/out/stats

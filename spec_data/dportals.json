@@ -1,0 +1,8 @@
+{
+    "summary": "xdg-portals for D",
+    "description":[
+        "This D library allows you to interface with",
+        "XDG Desktop Portals when you aren't using GTK or Qt.",
+        ""
+    ]
+}

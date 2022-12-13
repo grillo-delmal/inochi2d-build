@@ -1,0 +1,3 @@
+{
+    "sources":["https://github.com/libmir/mir-core/archive/refs/tags/v%{lib_gitver}/mir-core-%{lib_gitver}.tar.gz"]
+}

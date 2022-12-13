@@ -1,0 +1,3 @@
+{
+    "sources": ["https://github.com/libmir/mir-linux-kernel/archive/refs/tags/v%{lib_gitver}/mir-linux-kernel-%{lib_gitver}.tar.gz"]
+}

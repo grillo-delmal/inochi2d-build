@@ -1,0 +1,6 @@
+{
+    "prep":[
+        "mv LICENSE.md LICENSE",
+        ""
+    ]
+}

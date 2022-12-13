@@ -1,0 +1,4 @@
+{
+    "sources":["https://github.com/KitsunebiGames/i18n/archive/%{lib_commit}/i18n-%{lib_short}.tar.gz"],
+    "prep_file": "i18n-%{lib_commit}"
+}

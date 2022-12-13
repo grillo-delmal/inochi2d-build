@@ -1,0 +1,4 @@
+{
+    "sources": ["https://github.com/dayllenger/tinyfiledialogs-d/archive/refs/tags/v%{lib_gitver}/tinyfiledialogs-d-%{lib_gitver}.tar.gz"],
+    "prep_file": "tinyfiledialogs-d-%{lib_gitver}"
+}
