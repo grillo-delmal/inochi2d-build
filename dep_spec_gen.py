@@ -5,7 +5,7 @@ import subprocess
 import shutil
 
 from pathlib import Path
-from scripts.spec_gen import LibSpecFile
+from scripts.spec_gen import LibData, LibSpecFile
 
 data = {}
 with open("build_out/describe") as f:
@@ -24,6 +24,8 @@ def find_deps(parent, dep_graph):
 deps = list(find_deps("inochi-creator", dep_graph))
 deps.sort()
 
+# Find project libs
+project_libs = []
 project_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
@@ -34,9 +36,41 @@ project_deps = {
 pd_names = list(project_deps.keys())
 pd_names.sort()
 
+for name in pd_names:
+    NAME = project_deps[name]['name'].replace('-', '_').lower()
+    SEMVER = project_deps[name]['version']
+    GITPATH = project_deps[name]['path'].replace("/opt","./")
+    COMMIT = subprocess.run(
+        ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    GITVER = subprocess.run(
+        ['bash', '-c', 
+            'source ./scripts/gitver.sh;' + \
+            'git_version ' + GITPATH],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    GITDIST = subprocess.run(
+        ['bash', '-c', 
+            'source ./scripts/gitver.sh;' + \
+            'git_build ' + GITPATH],
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
 
-# Write indirect deps spec files
-indirect_build_reqs = []
+    project_libs.append(
+        LibData(
+            name, 
+            list(
+                { 
+                    dep.split(':')[0] 
+                        for dep in project_deps[name]['dependencies']
+                }), 
+            GITVER,
+            SEMVER, 
+            GITDIST,
+            COMMIT
+            )            
+        )
+
+# Find indirect deps and write spec files
+indirect_libs = []
 indirect_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
@@ -48,6 +82,7 @@ id_names = list(indirect_deps.keys())
 id_names.sort()
 
 true_deps = {}
+true_names = []
 
 for name in id_names:
     NAME = indirect_deps[name]['name'].lower()
@@ -58,14 +93,23 @@ for name in id_names:
         true_deps[TRUENAME].append({"name": NAME, "semver":SEMVER})
     else:
         true_deps[TRUENAME] = [{"name": NAME, "semver":SEMVER}]
+        true_names.append(TRUENAME)
 
-for name in true_deps:
+true_names.sort()
 
+for name in true_names:
+
+    # Copy build files into destination folder
     Path("build_out/zdub/zdub-%s"  % name).mkdir(parents=True, exist_ok=True)
     for file in Path("files/%s" % name).glob("**/*"):
         if file.is_file():
             shutil.copy(file, "build_out/zdub/zdub-%s/" % name)
 
+    # Also copy patches
+    for file in Path("patches/%s" % name).glob("*.patch"):
+        shutil.copy(file, "build_out/zdub/zdub-%s/" % name)
+
+    # Find lib dependencies
     id_deps = set()
     SEMVER = true_deps[name][0]["semver"]
 
@@ -80,7 +124,8 @@ for name in true_deps:
             id_deps.remove(dep)
             if dep_truename != name:
                 id_deps.add(dep_truename)
-        
+    
+    # Write specfile
     lib_spec = LibSpecFile(
         name, 
         list(
@@ -93,10 +138,7 @@ for name in true_deps:
     lib_spec.spec_gen(
                 "build_out/zdub/zdub-%s/zdub-%s.spec" % (name, name))
 
-    indirect_build_reqs.append(
-        "BuildRequires:  zdub-%s-static" % name)
-
-indirect_build_reqs.append("")
+    indirect_libs.append(lib_spec)
 
 # Write inochi-creator.spec
 
@@ -136,28 +178,13 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
         '# Project maintained deps',
         ""]))
 
-    for name in pd_names:
-        NAME = project_deps[name]['name'].replace('-', '_').lower()
-        SEMVER = project_deps[name]['version']
-        GITPATH = project_deps[name]['path'].replace("/opt","./")
-        COMMIT = subprocess.run(
-            ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
-            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-        GITVER = subprocess.run(
-            ['bash', '-c', 
-                'source ./scripts/gitver.sh;' + \
-                'git_version ' + GITPATH],
-            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-        GITDIST = subprocess.run(
-            ['bash', '-c', 
-                'source ./scripts/gitver.sh;' + \
-                'git_build ' + GITPATH],
-            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    for lib in project_libs:
+        NAME = lib.name.replace('-', '_').lower()
 
         spec.write('\n'.join([
-            "%%define %s_semver %s" % (NAME, SEMVER),
-            "%%define %s_commit %s" % (NAME, COMMIT),
-            "%%define %s_short %s" % (NAME, COMMIT[:7]),
+            "%%define %s_semver %s" % (NAME, lib.semver),
+            "%%define %s_commit %s" % (NAME, lib.commit),
+            "%%define %s_short %s" % (NAME, lib.commit[:7]),
             "",
             ""]))
 
@@ -228,8 +255,6 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
 
     # DEPS
 
-    spec.write('\n'.join(indirect_build_reqs))
-
     spec.write('\n'.join([line[8:] for line in '''\
         # dlang
         BuildRequires:  ldc
@@ -249,10 +274,13 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
 
         '''.splitlines()]))
 
-    spec.write('\n'.join(indirect_build_reqs))
+    spec.write('\n'.join([
+        "BuildRequires:  zdub-%s-static" % lib.name \
+            for lib in indirect_libs]))
+    spec.write('\n')
+    spec.write('\n')
 
     spec.write('\n'.join([line[8:] for line in '''\
-
         Requires:       hicolor-icon-theme
 
 
