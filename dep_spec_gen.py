@@ -5,7 +5,7 @@ import subprocess
 import shutil
 
 from pathlib import Path
-from scripts.spec_gen import spec_gen
+from scripts.spec_gen import LibSpecFile
 
 data = {}
 with open("build_out/describe") as f:
@@ -81,18 +81,17 @@ for name in true_deps:
             if dep_truename != name:
                 id_deps.add(dep_truename)
         
-    spec_gen(
-        "build_out/zdub/zdub-%s/zdub-%s.spec" % (name, name),
+    lib_spec = LibSpecFile(
         name, 
-        SEMVER, 
-        SEMVER, 
-        0,
-        "0000000", 
         list(
             { 
                 dep.split(':')[0] 
                     for dep in list(id_deps)
-            }))
+            }), 
+        SEMVER)
+
+    lib_spec.spec_gen(
+                "build_out/zdub/zdub-%s/zdub-%s.spec" % (name, name))
 
     indirect_build_reqs.append(
         "BuildRequires:  zdub-%s-static" % name)
