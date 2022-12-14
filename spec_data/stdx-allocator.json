@@ -1,5 +1,5 @@
 {
-    "license": "BSL-1.0",
+    "licenses": ["BSL-1.0"],
     "url": "https://github.com/wilzbach/stdx-allocator",
     "sources": ["https://github.com/wilzbach/stdx-allocator/archive/refs/tags/v%{lib_gitver}/stdx-allocator-%{lib_gitver}.tar.gz"]
 }

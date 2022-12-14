@@ -43,9 +43,9 @@ class LibData:
             if "summary" in spec_data \
             else "%{lib_name} library for D"
             
-        self.license = spec_data["license"] \
-            if "license" in spec_data \
-            else "BSD-2-Clause"
+        self.licenses = set(spec_data["licenses"] \
+            if "licenses" in spec_data \
+            else ["BSD-2-Clause"])
 
         self.url = spec_data["url"] \
             if "url" in spec_data \
@@ -172,7 +172,7 @@ class LibSpecFile(LibData):
                 "Release:        %autorelease",
                 "Summary:        %s" % (self.summary),
                 "Group:          Development/Libraries",
-                "License:        %s" % (self.license),
+                "License:        %s" % (" and ".join(self.licenses)),
                 "URL:            %s" % (self.url),
                 ""
             ]))

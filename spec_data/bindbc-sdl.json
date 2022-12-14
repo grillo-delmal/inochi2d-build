@@ -1,5 +1,5 @@
 {
-    "license": "BSL-1.0",
+    "licenses": ["BSL-1.0"],
     "url": "https://github.com/BindBC/bindbc-sdl",
     "sources":["https://github.com/BindBC/bindbc-sdl/archive/refs/tags/v%{lib_gitver}/bindbc-sdl-%{lib_gitver}.tar.gz"],
     "prep":[

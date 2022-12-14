@@ -1,5 +1,5 @@
 {
-    "license": "BSL-1.0 and MIT",
+    "licenses": ["BSL-1.0", "MIT"],
     "requires" : [
         "cmake",
         "gcc",

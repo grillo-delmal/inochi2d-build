@@ -1,5 +1,5 @@
 {
-    "license": "BSL-1.0",
+    "licenses": ["BSL-1.0"],
     "prep":[
         "mv LICENSE.md LICENSE",
         ""
