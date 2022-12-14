@@ -227,9 +227,41 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
 
         '''.splitlines()]))
 
-    # TODO: ADD OTHER LICENSES
+    # LICENSES
+
+    # List direct licenses
     spec.write('\n'.join([
-        "License:        BSD2",
+        "# Bundled lib licenses",
+        ""]))        
+    spec.write('\n'.join([
+        "##   %s licenses: %s" % (
+            lib.name, 
+            ' and '.join(lib.licenses)
+            ) for lib in project_libs]))
+    spec.write('\n')
+
+    # List static dependency licenses
+    spec.write('\n'.join([
+        "# Static dependencies licenses",
+        ""]))        
+    spec.write('\n'.join([
+        "##   %s licenses: %s" % (
+            lib.name, 
+            ' and '.join(lib.licenses)
+        ) for lib in indirect_libs]))
+    spec.write('\n')
+
+    # Add license field
+
+    licenses = list(set().union(
+        *[lib.licenses for lib in project_libs],
+        *[lib.licenses for lib in indirect_libs]))
+    licenses.sort()
+    licenses.remove("BSD-2-Clause")
+    licenses.insert(0, "BSD-2-Clause")
+    
+    spec.write('\n'.join([
+        "License:        %s" % ' and '.join(licenses),
         "",
         ""]))
 
