@@ -314,9 +314,36 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
     ]))
     spec.write('\n')
 
-    #TODO: PATCHES
+    # PATCHES
+    ptch_cnt = 0
 
-    #TODO: OTHER PATCHES
+    patch_list = []
+    if Path("patches/%s" % "inochi-creator").exists():
+        patch_list = list(Path("patches/%s" % "inochi-creator").glob("*.patch"))
+        patch_list.sort()
+    for file in patch_list:
+        spec.write('\n'.join([
+            "Patch%d:%s%s" % (
+                ptch_cnt, 
+                " " * (9 - math.floor(math.log10(ptch_cnt) if ptch_cnt > 0 else 0)), 
+                file.name) ,
+            ""
+        ]))
+        ptch_cnt += 1
+
+    # OTHER PATCHES
+    for lib in project_libs:
+        for patch in lib.patches:
+            spec.write('\n'.join([
+                "Patch%d:%s%s" % (
+                    ptch_cnt, 
+                    " " * (9 - math.floor(math.log10(ptch_cnt) if ptch_cnt > 0 else 0)), 
+                    patch) ,
+                ""
+            ]))
+            ptch_cnt += 1
+    spec.write('\n')
+    spec.write('\n')
 
     # DEPS
 
@@ -360,7 +387,7 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
 
         '''.splitlines()]))
 
-    #TODO: PREP
+    # PREP
 
     spec.write('\n'.join([line[8:] for line in '''\
         %prep
@@ -368,22 +395,22 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
 
         '''.splitlines()]))
 
-    #TODO: GENERIC PATCHES
+    # GENERIC PATCHES
     spec.write('\n'.join([line[8:] for line in '''\
         %patch0 -p1 -b .icon-fix
-
-        # FIX: Inochi creator version dependent on git
         %patch1 -p1 -b .no-gitver-a
+
+        '''.splitlines()]))
+
+    # GENERIC FIXES
+    spec.write('\n'.join([line[8:] for line in '''\
+        # FIX: Inochi creator version dependent on git
         cat > source/creator/ver.d <<EOF
         module creator.ver;
 
         enum INC_VERSION = "%{inochi_creator_semver}";
         EOF
 
-        '''.splitlines()]))
-
-    #TODO: GENERIC FIXES
-    spec.write('\n'.join([line[8:] for line in '''\
         # FIX: Replace config.d and banner.png
         rm source/creator/config.d
         cp %{SOURCE3} source/creator/

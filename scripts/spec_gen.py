@@ -97,10 +97,6 @@ class LibData:
             if "file_sources" in spec_data \
             else []
 
-        self.patches = spec_data["patches"] \
-            if "patches" in spec_data \
-            else []
-
         self.build_reqs = spec_data["build_reqs"] \
             if "build_reqs" in spec_data \
             else []
