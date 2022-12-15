@@ -1,7 +1,7 @@
 {
     "licenses": ["BSL-1.0"],
     "url": "https://github.com/BindBC/bindbc-opengl",
-    "sources":["https://github.com/BindBC/bindbc-opengl/archive/refs/tags/v%{lib_gitver}/bindbc-opengl-%{lib_gitver}.tar.gz"],
+    "source": "https://github.com/BindBC/bindbc-opengl/archive/refs/tags/v%{lib_gitver}/bindbc-opengl-%{lib_gitver}.tar.gz",
     "prep":[
         "mv LICENSE_1_0.txt LICENSE",
         ""

@@ -72,19 +72,18 @@ class LibData:
             if "vars" in spec_data \
             else {}
 
-        self.sources = spec_data["sources"] \
-            if "sources" in spec_data \
+        self.source = spec_data["source"] \
+            if "source" in spec_data \
+            else \
+                "https://github.com/Inochi2D/%s" \
+                "/archive/%%{%s_commit}" \
+                "/%s-%%{%s_short}.tar.gz" % (
+                    self.name, self.name.replace('-', '_').lower(),
+                    self.name, self.name.replace('-', '_').lower()
+                )
+        self.ex_sources = spec_data["ex_sources"] \
+            if "ex_sources" in spec_data \
             else []
-
-        if len(self.sources) == 0:
-            if int(dist) > 0:
-                self.sources.append(
-                    "https://github.com/Inochi2D/%{lib_name}"
-                    "/archive/%{lib_commit}/%{lib_name}-%{lib_short}.tar.gz")
-            else:
-                self.sources.append(
-                    "https://github.com/Inochi2D/%{lib_name}"
-                    "/archive/v%{lib_gitver}/%{lib_name}-%{lib_gitver}.tar.gz")
 
         self.files = spec_data["files"] \
             if "files" in spec_data \
@@ -179,23 +178,28 @@ class LibSpecFile(LibData):
 
             # Sources and patches
 
-            for i in range(len(self.sources)):
+            f.write('\n'.join([
+                "Source0:        %s" % self.source,
+                ""
+            ]))
+
+            src_cnt = 1
+            for src in self.ex_sources:
                 f.write('\n'.join([
                     "Source%d:%s%s" % (
-                        i, 
-                        " " * (8 - math.floor(math.log10(i) if i > 0 else 0)), 
-                        self.sources[i]) ,
+                        src_cnt, 
+                        " " * (8 - math.floor(math.log10(src_cnt))), 
+                        src) ,
                     ""
                 ]))
 
             if len(self.file_sources) > 0:
-                src_cnt = len(self.sources)
-                for i in range(len(self.file_sources)):
+                for src in self.file_sources:
                     f.write('\n'.join([
                         "Source%d:%s%s" % (
-                            src_cnt + i, 
-                            " " * (8 - math.floor(math.log10(i) if i > 0 else 0)), 
-                            self.file_sources[i]["name"]) ,
+                            src_cnt, 
+                            " " * (8 - math.floor(math.log10(src_cnt))), 
+                            src["name"]) ,
                         ""
                     ]))
 
@@ -283,7 +287,7 @@ class LibSpecFile(LibData):
             ]))
             if len(self.file_sources) > 0:
                 f.write("\n")
-                src_cnt = len(self.sources)
+                src_cnt = 1
                 for i in range(len(self.file_sources)):
                     if self.file_sources[i]["path"] != ".":
                         f.write('\n'.join([

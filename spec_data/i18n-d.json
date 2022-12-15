@@ -1,5 +1,5 @@
 {
     "url": "https://github.com/KitsunebiGames/i18n",
-    "sources":["https://github.com/KitsunebiGames/i18n/archive/%{lib_commit}/i18n-%{lib_short}.tar.gz"],
+    "source": "https://github.com/KitsunebiGames/i18n/archive/%{i18n_d_commit}/i18n-%{i18n_d_short}.tar.gz",
     "prep_file": "i18n-%{lib_commit}"
 }

@@ -1,5 +1,5 @@
 {
     "licenses": ["Apache-2.0"],
     "url": "https://github.com/libmir/mir-core",
-    "sources":["https://github.com/libmir/mir-core/archive/refs/tags/v%{lib_gitver}/mir-core-%{lib_gitver}.tar.gz"]
+    "source": "https://github.com/libmir/mir-core/archive/refs/tags/v%{lib_gitver}/mir-core-%{lib_gitver}.tar.gz"
 }

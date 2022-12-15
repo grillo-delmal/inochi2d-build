@@ -3,6 +3,7 @@
 import json
 import subprocess
 import shutil
+import math
 
 from pathlib import Path
 from scripts.spec_gen import LibData, LibSpecFile
@@ -279,7 +280,39 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
     
         '''.splitlines()]))
 
-    #TODO: OTHER SOURCES
+    # OTHER SOURCES
+    spec.write('\n'.join([
+        "# Project maintained deps",
+        ""]))        
+
+    src_cnt = 7
+
+    for lib in project_libs:
+        spec.write('\n'.join([
+            "Source%d:%s%s" % (
+                src_cnt, 
+                " " * (8 - math.floor(math.log10(src_cnt) if src_cnt > 0 else 0)), 
+                lib.source) ,
+            ""
+        ]))
+        src_cnt += 1
+    spec.write('\n')
+
+    spec.write('\n'.join([
+        "# cimgui",
+        ""]))        
+    spec.write('\n'.join([
+        "Source%d:%s%s" % (
+            src_cnt, 
+            " " * (8 - math.floor(math.log10(src_cnt) if src_cnt > 0 else 0)), 
+            "https://github.com/Inochi2D/cimgui/archive/%{cimgui_commit}/cimgui-%{cimgui_short}.tar.gz") ,
+        "Source%d:%s%s" % (
+            src_cnt+1, 
+            " " * (8 - math.floor(math.log10(src_cnt+1) if src_cnt+1 > 0 else 0)), 
+            "https://github.com/Inochi2D/imgui/archive/%{imgui_commit}/imgui-%{imgui_short}.tar.gz") ,
+        ""
+    ]))
+    spec.write('\n')
 
     #TODO: PATCHES
 
