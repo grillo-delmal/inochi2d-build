@@ -418,17 +418,94 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
 
         '''.splitlines()]))
 
-    #TODO: PREP DEPS
+    # PREP DEPS
     spec.write('\n'.join([line[8:] for line in '''\
         mkdir deps
 
         # Project maintained deps
         '''.splitlines()]))
 
-    spec.write('\n'.join([line[8:] for line in '''\
+    src_cnt = 7
+    ptch_cnt = 2
+
+    for lib in project_libs:
+        spec.write('\n'.join([
+            "tar -xzf %%{SOURCE%d}" % src_cnt,
+            "mv %s deps/%s" % (
+                lib.prep_file, lib.name), 
+            "dub add-local deps/%s/ \"%%{%s_semver}\"" % (
+                lib.name, lib.name.replace('-', '_').lower()),
+            ""
+        ]))
+
+        if len(lib.patches) > 0 or len(lib.prep) > 0:
+            spec.write('\n')
+            spec.write('\n'.join([
+                "pushd deps; pushd %s" % lib.name,
+                ""
+                ]))
+            if len(lib.patches) > 0:
+                spec.write('\n')
+                for patch in lib.patches:
+                    spec.write('\n'.join([
+                        "%%patch%d -p1 -b .%s-%s" % (
+                            ptch_cnt,
+                            *list(patch[:-6].split("_")[0::2])),
+                        ""
+                    ]))
+                    ptch_cnt += 1
+
+            if len(lib.prep) > 0:
+                spec.write('\n')
+                spec.write('\n'.join(lib.prep))
+
+            spec.write('\n'.join([
+                "",
+                "popd; popd",
+                ""
+                ]))
+
+        spec.write('\n')
+        src_cnt += 1
 
 
-        '''.splitlines()]))
+    spec.write('\n'.join([
+        "# cimgui",
+        "",
+        ""]))        
+
+    spec.write('\n'.join([
+        "tar -xzf %%{SOURCE%d}" % src_cnt,
+        "rm -r deps/bindbc-imgui/deps/cimgui", 
+        "mv cimgui-%{cimgui_commit} deps/bindbc-imgui/deps/cimgui",
+        "",
+        "tar -xzf %%{SOURCE%d}" % (src_cnt+1),
+        "rm -r deps/bindbc-imgui/deps/cimgui/imgui", 
+        "mv imgui-%{imgui_commit} deps/bindbc-imgui/deps/cimgui/imgui",
+        "",
+        "pushd deps; pushd bindbc-imgui",
+        "",
+        "rm -rf deps/freetype",
+        "rm -rf deps/glbinding",
+        "rm -rf deps/glfw",
+        "rm -rf deps/SDL",
+        "rm -rf deps/cimgui/imgui/examples/",
+        "",
+        "# FIX: Make bindbc-imgui submodule checking only check cimgui",
+        "rm .gitmodules",
+        "cat > .gitmodules <<EOF",
+        "[submodule \"deps/cimgui\"]",
+        "	path = deps/cimgui",
+        "	url = https://github.com/Inochi2D/cimgui.git",
+        "EOF",
+        "mkdir deps/cimgui/.git",
+        "",
+        "popd; popd",
+        ""
+    ]))
+    spec.write('\n')
+    spec.write('\n')
+    spec.write('\n')
 
     # BUILD
     spec.write('\n'.join([line[8:] for line in '''\

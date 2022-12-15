@@ -60,8 +60,9 @@ class LibData:
 
         self.prep_file = spec_data["prep_file"] \
             if "prep_file" in spec_data \
-            else "%{lib_name}-%{lib_commit}" \
-                if int(dist) > 0 \
+            else "%s-%%{%s_commit}" % (
+                self.name, self.name.replace('-', '_').lower()) \
+                if semver is not None \
                 else "%{lib_name}-%{lib_gitver}"
 
         self.macros = spec_data["macros"] \
