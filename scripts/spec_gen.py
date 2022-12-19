@@ -257,6 +257,8 @@ class LibSpecFile(LibData):
                 "Requires:       zdub-dub-settings-hack",
                 ""
             ]))
+            for dep in self.deps:
+                f.write("Requires:       zdub-%s-static\n" % dep)
 
             if len(self.requires) > 0:
                 f.write('\n')
