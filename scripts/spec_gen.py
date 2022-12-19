@@ -260,7 +260,7 @@ class LibSpecFile(LibData):
 
             if len(self.requires) > 0:
                 f.write('\n')
-                for req in data["requires"]:
+                for req in self.requires:
                     f.write("Requires:       %s\n" % req)
             f.write('\n'.join([
                 "",
