@@ -110,6 +110,10 @@ class LibData:
             if "prep" in spec_data \
             else []
 
+        self.build = spec_data["build"] \
+            if "build" in spec_data \
+            else []
+
         self.install = spec_data["install"] \
             if "install" in spec_data \
             else []
@@ -217,8 +221,13 @@ class LibSpecFile(LibData):
             f.write('\n'.join([
                 "BuildRequires:  setgittag",
                 "BuildRequires:  git",
+                "BuildRequires:  ldc",
+                "BuildRequires:  dub",
                 ""
             ]))
+            for dep in self.deps:
+                f.write("BuildRequires:  zdub-%s-static\n" % dep)
+
             for build_req in self.build_reqs:
                 f.write('\n'.join([
                     "BuildRequires:  %s" % build_req ,
@@ -245,14 +254,10 @@ class LibSpecFile(LibData):
                 "Summary:        Support to use %{lib_name} for developing D applications",
                 "Group:          Development/Libraries",
                 "",
-                "Requires:       ldc",
-                "Requires:       dub",
-                "",
                 "Requires:       zdub-dub-settings-hack",
                 ""
             ]))
-            for dep in self.deps:
-                f.write("Requires:       zdub-%s-static\n" % dep)
+
             if len(self.requires) > 0:
                 f.write('\n')
                 for req in data["requires"]:
@@ -306,12 +311,22 @@ class LibSpecFile(LibData):
             # Build data
             # TODO: Prebuild binaries in the future?
 
+
             f.write('\n'.join([
                 "%build",
-                "",
-                "",
                 ""
             ]))
+
+            if len(self.build) > 0:
+                f.write('\n'.join(self.build))
+            else:
+                f.write('\n'.join([
+                    "dub build",
+                    ""
+                ]))
+
+            f.write('\n')
+            f.write('\n')
 
             # Install data
 
