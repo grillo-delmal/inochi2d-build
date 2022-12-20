@@ -515,7 +515,9 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
             --cache=local \\
             --config=barebones \\
             --skip-registry=all \\
+            --temp-build \\
             --compiler=ldc2
+        cp /tmp/.dub/build/inochi-creator*/barebones*/* ./out/
 
 
         '''.splitlines()]))
