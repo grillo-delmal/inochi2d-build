@@ -103,6 +103,10 @@ rm source/creator/config.d
 cp /opt/files/config.d source/creator/
 cp /opt/files/empty.png res/ui/banner.png
 
+# Gen tl files
+chmod +x ./gentl.sh
+./gentl.sh
+
 if [[ ! -z ${DEBUG} ]]; then
     export DFLAGS='-g --d-debug'
 fi
