@@ -114,6 +114,10 @@ class LibData:
             if "build" in spec_data \
             else []
 
+        self.check = spec_data["check"] \
+            if "check" in spec_data \
+            else []
+
         self.install = spec_data["install"] \
             if "install" in spec_data \
             else []
@@ -311,19 +315,27 @@ class LibSpecFile(LibData):
             f.write('\n')
 
             # Build data
-            # TODO: Prebuild binaries in the future?
+            if len(self.build) > 0:
+                f.write('\n'.join([
+                    "%build",
+                    ""
+                ]))
+                f.write('\n'.join(self.build))
+                f.write('\n')
+                f.write('\n')
 
-
+            # Check
             f.write('\n'.join([
-                "%build",
+                "%check",
                 ""
             ]))
 
-            if len(self.build) > 0:
-                f.write('\n'.join(self.build))
+            if len(self.check) > 0:
+                f.write('\n'.join(self.check))
             else:
                 f.write('\n'.join([
                     "dub build",
+                    "dub clean",
                     ""
                 ]))
 
