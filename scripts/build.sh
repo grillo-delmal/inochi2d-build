@@ -45,7 +45,7 @@ enum IN_VERSION = "$(semver /opt/src/inochi2d/)";
 EOF
 
 # Add dlang deps
-dub add-local /opt/src/inochi2d/        "$(semver /opt/src/inochi2d/)"
+dub add-local /opt/src/inochi2d/        "$(semver /opt/src/inochi2d/ 0.8.0)"
 dub add-local /opt/src/psd-d/           "$(semver /opt/src/psd-d/)"
 dub add-local /opt/src/bindbc-imgui/    "$(semver /opt/src/bindbc-imgui/)"
 dub add-local /opt/src/facetrack-d/     "$(semver /opt/src/facetrack-d/)"
