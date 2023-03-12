@@ -28,3 +28,12 @@
 [submodule "src/dportals"]
 	path = src/dportals
 	url = https://github.com/Inochi2D/dportals.git
+[submodule "src/bindbc-spout2"]
+	path = src/bindbc-spout2
+	url = https://github.com/Inochi2D/bindbc-spout2.git
+[submodule "src/inui"]
+	path = src/inui
+	url = https://github.com/Inochi2D/inui.git
+[submodule "src/inochi-session"]
+	path = src/inochi-session
+	url = https://github.com/Inochi2D/inochi-session.git
