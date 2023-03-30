@@ -72,128 +72,139 @@ pushd bindbc-imgui
 mkdir -p deps/build_linux_x64_cimguiStatic
 mkdir -p deps/build_linux_x64_cimguiDynamic
 
-ARCH=$(uname -m)
-if [ "${ARCH}" == 'x86_64' ]; then
-    if [[ -z ${DEBUG} ]]; then
-        cmake -DSTATIC_CIMGUI= -S deps -B deps/build_linux_x64_cimguiStatic
-        cmake --build deps/build_linux_x64_cimguiStatic --config Release
+if [[ ! -z ${PREBUILD_IMGUI} ]]; then
 
-        cmake -S deps -B deps/build_linux_x64_cimguiDynamic
-        cmake --build deps/build_linux_x64_cimguiDynamic --config Release
-    else
-        cmake -DCMAKE_BUILD_TYPE=Debug -DSTATIC_CIMGUI= -S deps -B deps/build_linux_x64_cimguiStatic
-        cmake --build deps/build_linux_x64_cimguiStatic --config Debug
+    ARCH=$(uname -m)
+    if [ "${ARCH}" == 'x86_64' ]; then
+        if [[ -z ${DEBUG} ]]; then
+            cmake -DSTATIC_CIMGUI= -S deps -B deps/build_linux_x64_cimguiStatic
+            cmake --build deps/build_linux_x64_cimguiStatic --config Release
 
-        cmake -DCMAKE_BUILD_TYPE=Debug -S deps -B deps/build_linux_x64_cimguiDynamic
-        cmake --build deps/build_linux_x64_cimguiDynamic --config Debug
+            cmake -S deps -B deps/build_linux_x64_cimguiDynamic
+            cmake --build deps/build_linux_x64_cimguiDynamic --config Release
+        else
+            cmake -DCMAKE_BUILD_TYPE=Debug -DSTATIC_CIMGUI= -S deps -B deps/build_linux_x64_cimguiStatic
+            cmake --build deps/build_linux_x64_cimguiStatic --config Debug
 
+            cmake -DCMAKE_BUILD_TYPE=Debug -S deps -B deps/build_linux_x64_cimguiDynamic
+            cmake --build deps/build_linux_x64_cimguiDynamic --config Debug
+
+        fi
+    elif [ "${ARCH}" == 'aarch64' ]; then
+        if [[ -z ${DEBUG} ]]; then
+            cmake -DSTATIC_CIMGUI= -S deps -B deps/build_linux_aarch64_cimguiStatic
+            cmake --build deps/build_linux_aarch64_cimguiStatic --config Release
+
+            cmake -S deps -B deps/build_linux_aarch64_cimguiDynamic
+            cmake --build deps/build_linux_aarch64_cimguiDynamic --config Release
+        else
+            cmake -DCMAKE_BUILD_TYPE=Debug -DSTATIC_CIMGUI= -S deps -B deps/build_linux_aarch64_cimguiStatic
+            cmake --build deps/build_linux_aarch64_cimguiStatic --config Debug
+
+            cmake -DCMAKE_BUILD_TYPE=Debug -S deps -B deps/build_linux_aarch64_cimguiDynamic
+            cmake --build deps/build_linux_aarch64_cimguiDynamic --config Debug
+        fi
     fi
-elif [ "${ARCH}" == 'aarch64' ]; then
-    if [[ -z ${DEBUG} ]]; then
-        cmake -DSTATIC_CIMGUI= -S deps -B deps/build_linux_aarch64_cimguiStatic
-        cmake --build deps/build_linux_aarch64_cimguiStatic --config Release
+fi
 
-        cmake -S deps -B deps/build_linux_aarch64_cimguiDynamic
-        cmake --build deps/build_linux_aarch64_cimguiDynamic --config Release
-    else
-        cmake -DCMAKE_BUILD_TYPE=Debug -DSTATIC_CIMGUI= -S deps -B deps/build_linux_aarch64_cimguiStatic
-        cmake --build deps/build_linux_aarch64_cimguiStatic --config Debug
+popd
+popd
 
-        cmake -DCMAKE_BUILD_TYPE=Debug -S deps -B deps/build_linux_aarch64_cimguiDynamic
-        cmake --build deps/build_linux_aarch64_cimguiDynamic --config Debug
+if [[ ! -z ${CREATOR} ]]; then
+    # Build inochi-creator
+    pushd src
+    pushd inochi-creator
+
+    # Remove branding assets
+    rm -rf res/Inochi-Creator.iconset/
+    find res/ui/ -type f -not -name "grid.png" -delete
+    rm res/icon.png
+    rm res/Info.plist
+    rm res/logo.png
+    rm res/logo_256.png
+    rm res/inochi-creator.ico
+    rm res/inochi-creator.rc
+    rm res/shaders/ada.frag
+    rm res/shaders/ada.vert
+
+    # Replace files
+    rm source/creator/config.d
+    cp /opt/files/config.d source/creator/
+    cp /opt/files/empty.png res/ui/banner.png
+
+    # Gen tl files
+    chmod +x ./gentl.sh
+    ./gentl.sh
+
+    if [[ ! -z ${DEBUG} ]]; then
+        export DFLAGS='-g --d-debug'
     fi
+    export DC='/usr/bin/ldc2'
+    echo "Download time" > /opt/out/creator-stats 
+    { time \
+        dub describe \
+            --config=barebones \
+            --cache=local \
+                2>&1 > /opt/out/creator-describe ; \
+        }  2>> /opt/out/creator-stats 
+    echo "" >> /opt/out/creator-stats 
+    echo "Build time" >> /opt/out/creator-stats 
+    { time \
+        dub build \
+            --config=barebones \
+            --cache=local \
+                2>&1 ; \
+        } 2>> /opt/out/creator-stats 
+    popd
+    popd
 fi
 
-popd
-popd
-
-# Build inochi-creator
-pushd src
-pushd inochi-creator
-
-# Remove branding assets
-rm -rf res/Inochi-Creator.iconset/
-find res/ui/ -type f -not -name "grid.png" -delete
-rm res/icon.png
-rm res/Info.plist
-rm res/logo.png
-rm res/logo_256.png
-rm res/inochi-creator.ico
-rm res/inochi-creator.rc
-rm res/shaders/ada.frag
-rm res/shaders/ada.vert
-
-# Replace files
-rm source/creator/config.d
-cp /opt/files/config.d source/creator/
-cp /opt/files/empty.png res/ui/banner.png
-
-# Gen tl files
-chmod +x ./gentl.sh
-./gentl.sh
-
-if [[ ! -z ${DEBUG} ]]; then
-    export DFLAGS='-g --d-debug'
+if [[ ! -z ${SESSION} ]]; then
+    # Build inochi-session
+    pushd src
+    pushd inochi-session
+    if [[ ! -z ${DEBUG} ]]; then
+        export DFLAGS='-g --d-debug'
+    fi
+    export DC='/usr/bin/ldc2'
+    echo "Download time" > /opt/out/session-stats 
+    { time \
+        dub describe \
+            --config=barebones \
+            --cache=local \
+            --override-config=facetrack-d/web-adaptors \
+                2>&1 > /opt/out/session-describe ; \
+        }  2>> /opt/out/session-stats
+    echo "" >> /opt/out/session-stats 
+    echo "Build time" >> /opt/out/session-stats 
+    { time \
+        dub build \
+            --config=barebones \
+            --cache=local \
+            --override-config=facetrack-d/web-adaptors \
+                2>&1 ; \
+        } 2>> /opt/out/session-stats
+    popd
+    popd
 fi
-export DC='/usr/bin/ldc2'
-echo "Download time" > /opt/out/creator-stats 
-{ time \
-    dub describe \
-        --config=barebones \
-        --cache=local \
-            2>&1 > /opt/out/creator-describe ; \
-    }  2>> /opt/out/creator-stats 
-echo "" >> /opt/out/creator-stats 
-echo "Build time" >> /opt/out/creator-stats 
-{ time \
-    dub build \
-        --config=barebones \
-        --cache=local \
-            2>&1 ; \
-    } 2>> /opt/out/creator-stats 
-popd
-popd
 
-# Build inochi-session
-pushd src
-pushd inochi-session
-if [[ ! -z ${DEBUG} ]]; then
-    export DFLAGS='-g --d-debug'
+if [[ ! -z ${CREATOR} ]]; then
+    # Install inochi-creator
+    rsync -r /opt/src/inochi-creator/out/ /opt/out/inochi-creator/
+    echo "" >> /opt/out/creator-stats 
+    echo "Result files" >> /opt/out/creator-stats 
+    echo "" >> /opt/out/creator-stats 
+    du -sh /opt/out/inochi-creator/* >> /opt/out/creator-stats 
 fi
-export DC='/usr/bin/ldc2'
-echo "Download time" > /opt/out/session-stats 
-{ time \
-    dub describe \
-        --config=barebones \
-        --cache=local \
-        --override-config=facetrack-d/web-adaptors \
-            2>&1 > /opt/out/session-describe ; \
-    }  2>> /opt/out/session-stats
-echo "" >> /opt/out/session-stats 
-echo "Build time" >> /opt/out/session-stats 
-{ time \
-    dub build \
-        --config=barebones \
-        --cache=local \
-        --override-config=facetrack-d/web-adaptors \
-            2>&1 ; \
-    } 2>> /opt/out/session-stats
-popd
-popd
 
-# Install inochi-creator
-rsync -r /opt/src/inochi-creator/out/ /opt/out/inochi-creator/
-echo "" >> /opt/out/creator-stats 
-echo "Result files" >> /opt/out/creator-stats 
-echo "" >> /opt/out/creator-stats 
-du -sh /opt/out/inochi-creator/* >> /opt/out/creator-stats 
-
-# Install inochi-session
-rsync -r /opt/src/inochi-session/out/ /opt/out/inochi-session/
-echo "" >> /opt/out/session-stats 
-echo "Result files" >> /opt/out/session-stats 
-echo "" >> /opt/out/session-stats 
-du -sh /opt/out/inochi-session/* >> /opt/out/session-stats
+if [[ ! -z ${SESSION} ]]; then
+    # Install inochi-session
+    rsync -r /opt/src/inochi-session/out/ /opt/out/inochi-session/
+    echo "" >> /opt/out/session-stats 
+    echo "Result files" >> /opt/out/session-stats 
+    echo "" >> /opt/out/session-stats 
+    du -sh /opt/out/inochi-session/* >> /opt/out/session-stats
+fi
 
 # ---
 dub list > /opt/out/version_dump

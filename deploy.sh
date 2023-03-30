@@ -2,6 +2,10 @@
 
 set -e
 
+PREBUILD_IMGUI=1
+CREATOR=1
+SESSION=1
+
 podman build -t inochi-creator-build .
 
 mkdir -p $(pwd)/build_out
@@ -26,6 +30,9 @@ podman run -ti --rm \
     -v $(pwd)/src/vmc-d:/opt/orig/vmc-d/:ro,Z \
     -v $(pwd)/patches:/opt/patches/:ro,Z \
     -v $(pwd)/files:/opt/files/:ro,Z \
+    -e PREBUILD_IMGUI=${PREBUILD_IMGUI} \
+    -e CREATOR=${CREATOR} \
+    -e SESSION=${SESSION} \
     -e DEBUG=${DEBUG} \
     localhost/inochi-creator-build:latest
 
