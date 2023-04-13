@@ -7,23 +7,30 @@ source /opt/build/semver.sh
 # Clean out folder
 find /opt/out/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
 
+if [[ ! -z ${LOAD_CACHE} ]]; then
+    mkdir -p /opt/cache/src/
+    rsync -azh /opt/cache/src/ /opt/src/
+    mkdir -p /opt/cache/.dub/
+    rsync -azh /opt/cache/.dub/ /opt/cache/.dub/
+fi
+
 cd /opt
-mkdir src
+mkdir -p src
 
-rsync -r /opt/orig/inochi-creator/ /opt/src/inochi-creator/
-rsync -r /opt/orig/inochi-session/ /opt/src/inochi-session/
+rsync -azh /opt/orig/inochi-creator/ /opt/src/inochi-creator/
+rsync -azh /opt/orig/inochi-session/ /opt/src/inochi-session/
 
-rsync -r /opt/orig/bindbc-imgui/ /opt/src/bindbc-imgui/
-rsync -r /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
-rsync -r /opt/orig/dportals/ /opt/src/dportals/
-rsync -r /opt/orig/facetrack-d/ /opt/src/facetrack-d/
-rsync -r /opt/orig/fghj/ /opt/src/fghj/
-rsync -r /opt/orig/i18n/ /opt/src/i18n/
-rsync -r /opt/orig/inmath/ /opt/src/inmath/
-rsync -r /opt/orig/inochi2d/ /opt/src/inochi2d/
-rsync -r /opt/orig/inui/ /opt/src/inui/
-rsync -r /opt/orig/psd-d/ /opt/src/psd-d/
-rsync -r /opt/orig/vmc-d/ /opt/src/vmc-d/
+rsync -azh /opt/orig/bindbc-imgui/ /opt/src/bindbc-imgui/
+rsync -azh /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
+rsync -azh /opt/orig/dportals/ /opt/src/dportals/
+rsync -azh /opt/orig/facetrack-d/ /opt/src/facetrack-d/
+rsync -azh /opt/orig/fghj/ /opt/src/fghj/
+rsync -azh /opt/orig/i18n/ /opt/src/i18n/
+rsync -azh /opt/orig/inmath/ /opt/src/inmath/
+rsync -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
+rsync -azh /opt/orig/inui/ /opt/src/inui/
+rsync -azh /opt/orig/psd-d/ /opt/src/psd-d/
+rsync -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
 
 pushd patches
 for d in */ ; do
@@ -73,6 +80,7 @@ mkdir -p deps/build_linux_x64_cimguiStatic
 mkdir -p deps/build_linux_x64_cimguiDynamic
 
 if [[ ! -z ${PREBUILD_IMGUI} ]]; then
+    echo "======== Prebuild imgui ========"
 
     ARCH=$(uname -m)
     if [ "${ARCH}" == 'x86_64' ]; then
@@ -111,6 +119,8 @@ popd
 popd
 
 if [[ ! -z ${CREATOR} ]]; then
+    echo "======== Starting creator ========"
+
     # Build inochi-creator
     pushd src
     pushd inochi-creator
@@ -140,14 +150,18 @@ if [[ ! -z ${CREATOR} ]]; then
         export DFLAGS='-g --d-debug'
     fi
     export DC='/usr/bin/ldc2'
-    echo "Download time" > /opt/out/creator-stats 
-    { time \
-        dub describe \
-            --config=barebones \
-            --cache=local \
-                2>&1 > /opt/out/creator-describe ; \
-        }  2>> /opt/out/creator-stats 
-    echo "" >> /opt/out/creator-stats 
+    if [[ ! -z ${PREDOWNLOAD_LIBS} ]]; then
+        echo "======== Downloading creator libs ========"
+        echo "Download time" > /opt/out/creator-stats 
+        { time \
+            dub describe \
+                --config=barebones \
+                --cache=local \
+                    2>&1 > /opt/out/creator-describe ; \
+            }  2>> /opt/out/creator-stats 
+        echo "" >> /opt/out/creator-stats 
+    fi
+    echo "======== Building creator ========"
     echo "Build time" >> /opt/out/creator-stats 
     { time \
         dub build \
@@ -160,6 +174,8 @@ if [[ ! -z ${CREATOR} ]]; then
 fi
 
 if [[ ! -z ${SESSION} ]]; then
+    echo "======== Starting session ========"
+
     # Build inochi-session
     pushd src
     pushd inochi-session
@@ -167,15 +183,19 @@ if [[ ! -z ${SESSION} ]]; then
         export DFLAGS='-g --d-debug'
     fi
     export DC='/usr/bin/ldc2'
-    echo "Download time" > /opt/out/session-stats 
-    { time \
-        dub describe \
-            --config=barebones \
-            --cache=local \
-            --override-config=facetrack-d/web-adaptors \
-                2>&1 > /opt/out/session-describe ; \
-        }  2>> /opt/out/session-stats
-    echo "" >> /opt/out/session-stats 
+    if [[ ! -z ${PREDOWNLOAD_LIBS} ]]; then
+        echo "======== Downloading session libs ========"
+        echo "Download time" > /opt/out/session-stats 
+        { time \
+            dub describe \
+                --config=barebones \
+                --cache=local \
+                --override-config=facetrack-d/web-adaptors \
+                    2>&1 > /opt/out/session-describe ; \
+            }  2>> /opt/out/session-stats
+        echo "" >> /opt/out/session-stats 
+    fi
+    echo "======== Building session ========"
     echo "Build time" >> /opt/out/session-stats 
     { time \
         dub build \
@@ -188,9 +208,11 @@ if [[ ! -z ${SESSION} ]]; then
     popd
 fi
 
+echo "======== Getting results ========"
+
 if [[ ! -z ${CREATOR} ]]; then
     # Install inochi-creator
-    rsync -r /opt/src/inochi-creator/out/ /opt/out/inochi-creator/
+    rsync -azh /opt/src/inochi-creator/out/ /opt/out/inochi-creator/
     echo "" >> /opt/out/creator-stats 
     echo "Result files" >> /opt/out/creator-stats 
     echo "" >> /opt/out/creator-stats 
@@ -199,7 +221,7 @@ fi
 
 if [[ ! -z ${SESSION} ]]; then
     # Install inochi-session
-    rsync -r /opt/src/inochi-session/out/ /opt/out/inochi-session/
+    rsync -azh /opt/src/inochi-session/out/ /opt/out/inochi-session/
     echo "" >> /opt/out/session-stats 
     echo "Result files" >> /opt/out/session-stats 
     echo "" >> /opt/out/session-stats 
@@ -208,3 +230,10 @@ fi
 
 # ---
 dub list > /opt/out/version_dump
+
+if [[ ! -z ${SAVE_CACHE} ]]; then
+    find /opt/cache/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
+    rsync -azh /opt/src/ /opt/cache/src/ 
+    rsync -azh ~/.dub/ /opt/cache/.dub/
+fi
+
