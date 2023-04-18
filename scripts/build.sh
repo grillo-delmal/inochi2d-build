@@ -139,8 +139,7 @@ if [[ ! -z ${CREATOR} ]]; then
 
     # Replace files
     rm source/creator/config.d
-    cp /opt/files/config.d source/creator/
-    cp /opt/files/empty.png res/ui/banner.png
+    rsync -azh /opt/files/inochi-creator/ $(pwd)
 
     # Gen tl files
     chmod +x ./gentl.sh
