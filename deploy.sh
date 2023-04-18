@@ -10,7 +10,7 @@ SESSION=1
 LOAD_CACHE=1
 SAVE_CACHE=1
 
-podman build -t inochi-creator-build .
+podman build -t inochi-build .
 
 mkdir -p $(pwd)/build_out
 mkdir -p $(pwd)/cache
@@ -44,7 +44,7 @@ podman run -ti --rm \
     -e DEBUG=${DEBUG} \
     -e LOAD_CACHE=${LOAD_CACHE} \
     -e SAVE_CACHE=${SAVE_CACHE} \
-    localhost/inochi-creator-build:latest
+    localhost/inochi-build:latest
 
 podman unshare chown 0:0 -R $(pwd)/build_out
 podman unshare chown 0:0 -R $(pwd)/cache
