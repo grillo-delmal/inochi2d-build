@@ -11,7 +11,7 @@ if [[ ! -z ${LOAD_CACHE} ]]; then
     mkdir -p /opt/cache/src/
     rsync -azh /opt/cache/src/ /opt/src/
     mkdir -p /opt/cache/.dub/
-    rsync -azh /opt/cache/.dub/ /opt/cache/.dub/
+    rsync -azh /opt/cache/.dub/ ~/.dub/
 fi
 
 cd /opt
