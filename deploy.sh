@@ -24,12 +24,13 @@ podman run -ti --rm \
     -v $(pwd)/.git:/opt/.git/:ro,Z \
     -v $(pwd)/src/inochi-creator:/opt/orig/inochi-creator/:ro,Z \
     -v $(pwd)/src/inochi-session:/opt/orig/inochi-session/:ro,Z \
-    -v $(pwd)/src/bindbc-imgui:/opt/orig/bindbc-imgui/:ro,Z \
     -v $(pwd)/src/bindbc-spout2:/opt/orig/bindbc-spout2/:ro,Z \
     -v $(pwd)/src/dportals:/opt/orig/dportals/:ro,Z \
     -v $(pwd)/src/facetrack-d:/opt/orig/facetrack-d/:ro,Z \
     -v $(pwd)/src/fghj:/opt/orig/fghj/:ro,Z \
     -v $(pwd)/src/i18n:/opt/orig/i18n/:ro,Z \
+    -v $(pwd)/src/i2d-imgui:/opt/orig/i2d-imgui/:ro,Z \
+    -v $(pwd)/src/i2d-opengl:/opt/orig/i2d-opengl/:ro,Z \
     -v $(pwd)/src/inmath:/opt/orig/inmath/:ro,Z \
     -v $(pwd)/src/inochi2d:/opt/orig/inochi2d/:ro,Z \
     -v $(pwd)/src/inui:/opt/orig/inui/:ro,Z \

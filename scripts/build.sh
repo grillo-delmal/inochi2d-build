@@ -20,12 +20,13 @@ mkdir -p src
 rsync -azh /opt/orig/inochi-creator/ /opt/src/inochi-creator/
 rsync -azh /opt/orig/inochi-session/ /opt/src/inochi-session/
 
-rsync -azh /opt/orig/bindbc-imgui/ /opt/src/bindbc-imgui/
 rsync -azh /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
 rsync -azh /opt/orig/dportals/ /opt/src/dportals/
 rsync -azh /opt/orig/facetrack-d/ /opt/src/facetrack-d/
 rsync -azh /opt/orig/fghj/ /opt/src/fghj/
 rsync -azh /opt/orig/i18n/ /opt/src/i18n/
+rsync -azh /opt/orig/i2d-imgui/ /opt/src/i2d-imgui/
+rsync -azh /opt/orig/i2d-opengl/ /opt/src/i2d-opengl/
 rsync -azh /opt/orig/inmath/ /opt/src/inmath/
 rsync -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
 rsync -azh /opt/orig/inui/ /opt/src/inui/
@@ -61,21 +62,22 @@ enum IN_VERSION = "$(semver /opt/src/inochi2d/)";
 EOF
 
 # Add dlang deps
-dub add-local /opt/src/bindbc-imgui/    "$(semver /opt/src/bindbc-imgui/)"
 dub add-local /opt/src/bindbc-spout2/   "$(semver /opt/src/bindbc-spout2/)"
 dub add-local /opt/src/dportals/        "$(semver /opt/src/dportals/)"
 dub add-local /opt/src/facetrack-d/     "$(semver /opt/src/facetrack-d/)"
 dub add-local /opt/src/fghj/            "$(semver /opt/src/fghj/)"
 dub add-local /opt/src/i18n/            "$(semver /opt/src/i18n/)"
+dub add-local /opt/src/i2d-imgui/       "$(semver /opt/src/i2d-imgui/)"
+dub add-local /opt/src/i2d-opengl/      "$(semver /opt/src/i2d-opengl/)"
 dub add-local /opt/src/inmath/          "$(semver /opt/src/inmath/)"
 dub add-local /opt/src/inochi2d/        "$(semver /opt/src/inochi2d/ 0.8.0)"
 dub add-local /opt/src/inui/            "$(semver /opt/src/inui/ 1.0.0)"
 dub add-local /opt/src/psd-d/           "$(semver /opt/src/psd-d/)"
 dub add-local /opt/src/vmc-d/           "$(semver /opt/src/vmc-d/)"
 
-# Build bindbc-imgui deps
+# Build i2d-imgui deps
 pushd src
-pushd bindbc-imgui
+pushd i2d-imgui
 mkdir -p deps/build_linux_x64_cimguiStatic
 mkdir -p deps/build_linux_x64_cimguiDynamic
 

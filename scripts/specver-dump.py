@@ -100,7 +100,7 @@ print()
 print('# cimgui') 
 
 NAME = 'cimgui'
-GITPATH = './src/bindbc-imgui/deps/cimgui'
+GITPATH = './src/i2d-imgui/deps/cimgui'
 COMMIT = subprocess.run(
     ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
     stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
@@ -108,7 +108,7 @@ print("%define", "%s_commit" % NAME, COMMIT)
 print("%define", "%s_short" % NAME, COMMIT[:7])
 
 NAME = 'imgui'
-GITPATH = './src/bindbc-imgui/deps/cimgui/imgui'
+GITPATH = './src/i2d-imgui/deps/cimgui/imgui'
 COMMIT = subprocess.run(
     ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
     stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
