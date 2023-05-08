@@ -1,0 +1,15 @@
+diff --git a/dub.sdl b/dub.sdl
+index de7d5e8..cdf3168 100644
+--- a/dub.sdl
++++ b/dub.sdl
+@@ -50,8 +50,8 @@ configuration "static_dynamicCRT" {
+         "cmake -DSTATIC_CIMGUI= -S deps -B deps/build_linux_x64_cimguiStatic" \
+         "cmake --build deps/build_linux_x64_cimguiStatic --config Release" platform="linux-x86_64"
+ 
+-    sourceFiles "$PACKAGE_DIR/libs/x86_64/linux/Static/cimgui.a" platform="linux-x86_64"
+-    libs "sdl2" "freetype" ":libstdc++.so" platform="linux-x86_64"
++    dflags "-L-L$PACKAGE_DIR/libs/x86_64/linux/Static/" platform="linux-x86_64"
++    libs "sdl2" "freetype" ":libstdc++.so" ":cimgui.a" platform="linux-x86_64"
+ 
+     // Linux aarch64
+     preBuildCommands \
