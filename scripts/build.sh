@@ -8,10 +8,10 @@ source /opt/build/semver.sh
 find /opt/out/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
 
 if [[ ! -z ${LOAD_CACHE} ]]; then
-    mkdir -p /opt/cache/src/
-    rsync -azh /opt/cache/src/ /opt/src/
     mkdir -p /opt/cache/.dub/
     rsync -azh /opt/cache/.dub/ ~/.dub/
+
+    rm -f /opt/cache/.dub/packages/local-packages.json
 fi
 
 cd /opt
@@ -131,11 +131,8 @@ if [[ ! -z ${CREATOR} ]]; then
     rm -rf res/Inochi-Creator.iconset/
     find res/ui/ -type f -not -name "grid.png" -delete
     rm res/icon.png
-    rm res/Info.plist
     rm res/logo.png
     rm res/logo_256.png
-    rm res/inochi-creator.ico
-    rm res/inochi-creator.rc
     rm res/shaders/ada.frag
     rm res/shaders/ada.vert
 
@@ -157,7 +154,7 @@ if [[ ! -z ${CREATOR} ]]; then
         { time \
             dub describe \
                 --config=barebones \
-                --cache=local \
+                --cache=user \
                     2>&1 > /opt/out/creator-describe ; \
             }  2>> /opt/out/creator-stats 
         echo "" >> /opt/out/creator-stats 
@@ -167,7 +164,7 @@ if [[ ! -z ${CREATOR} ]]; then
     { time \
         dub build \
             --config=barebones \
-            --cache=local \
+            --cache=user \
                 2>&1 ; \
         } 2>> /opt/out/creator-stats 
     popd
@@ -190,7 +187,7 @@ if [[ ! -z ${SESSION} ]]; then
         { time \
             dub describe \
                 --config=barebones \
-                --cache=local \
+                --cache=user \
                 --override-config=facetrack-d/web-adaptors \
                     2>&1 > /opt/out/session-describe ; \
             }  2>> /opt/out/session-stats
@@ -201,7 +198,7 @@ if [[ ! -z ${SESSION} ]]; then
     { time \
         dub build \
             --config=barebones \
-            --cache=local \
+            --cache=user \
             --override-config=facetrack-d/web-adaptors \
                 2>&1 ; \
         } 2>> /opt/out/session-stats
