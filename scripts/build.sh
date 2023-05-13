@@ -75,13 +75,22 @@ dub add-local /opt/src/inui/            "$(semver /opt/src/inui/)"
 dub add-local /opt/src/psd-d/           "$(semver /opt/src/psd-d/)"
 dub add-local /opt/src/vmc-d/           "$(semver /opt/src/vmc-d/)"
 
-# Build i2d-imgui deps
-pushd src
-pushd i2d-imgui
-mkdir -p deps/build_linux_x64_cimguiStatic
-mkdir -p deps/build_linux_x64_cimguiDynamic
-
 if [[ ! -z ${PREBUILD_IMGUI} ]]; then
+
+    # Build i2d-imgui deps
+    pushd src
+    pushd i2d-imgui
+
+    if [[ ! -z ${LOAD_CACHE} ]]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ ./deps/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/ ./deps/
+    fi
+
+    mkdir -p deps/build_linux_x64_cimguiStatic
+    mkdir -p deps/build_linux_x64_cimguiDynamic
+
     echo "======== Prebuild imgui ========"
 
     ARCH=$(uname -m)
@@ -114,11 +123,11 @@ if [[ ! -z ${PREBUILD_IMGUI} ]]; then
             cmake -DCMAKE_BUILD_TYPE=Debug -S deps -B deps/build_linux_aarch64_cimguiDynamic
             cmake --build deps/build_linux_aarch64_cimguiDynamic --config Debug
         fi
-    fi
-fi
 
-popd
-popd
+    fi
+    popd
+    popd
+fi
 
 if [[ ! -z ${CREATOR} ]]; then
     echo "======== Starting creator ========"

@@ -1,0 +1,14 @@
+diff --git a/dub.sdl b/dub.sdl
+index 41be3d4..0de2054 100644
+--- a/dub.sdl
++++ b/dub.sdl
+@@ -32,6 +32,9 @@ configuration "barebones" {
+ 	targetType "executable"
+ 
+ 	dependency "dportals" version="~>0.1.0"
++
++	subConfiguration "lumars" "lua51-dynamic"
++	versions "LUA_51"
+ }
+ 
+ 

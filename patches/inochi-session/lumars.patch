@@ -1,17 +1,3 @@
-diff --git a/dub.sdl b/dub.sdl
-index cebf335..41e852d 100644
---- a/dub.sdl
-+++ b/dub.sdl
-@@ -30,6 +30,9 @@ stringImportPaths "res"
- configuration "barebones" {
- 	platforms "linux"
- 	targetType "executable"
-+
-+	subConfiguration "lumars" "lua51-dynamic"
-+	versions "LUA_51"
- }
- 
- 
 diff --git a/source/session/plugins/package.d b/source/session/plugins/package.d
 index 965c64f..84bc5ed 100644
 --- a/source/session/plugins/package.d
