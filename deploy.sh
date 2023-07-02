@@ -34,6 +34,7 @@ podman run -ti --rm \
     -v $(pwd)/src/inmath:/opt/orig/inmath/:ro,Z \
     -v $(pwd)/src/inochi2d:/opt/orig/inochi2d/:ro,Z \
     -v $(pwd)/src/inui:/opt/orig/inui/:ro,Z \
+    -v $(pwd)/src/kra-d:/opt/orig/kra-d/:ro,Z \
     -v $(pwd)/src/psd-d:/opt/orig/psd-d/:ro,Z \
     -v $(pwd)/src/vmc-d:/opt/orig/vmc-d/:ro,Z \
     -v $(pwd)/patches:/opt/patches/:ro,Z \

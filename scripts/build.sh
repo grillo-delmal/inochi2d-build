@@ -30,6 +30,7 @@ rsync -azh /opt/orig/i2d-opengl/ /opt/src/i2d-opengl/
 rsync -azh /opt/orig/inmath/ /opt/src/inmath/
 rsync -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
 rsync -azh /opt/orig/inui/ /opt/src/inui/
+rsync -azh /opt/orig/kra-d/ /opt/src/kra-d/
 rsync -azh /opt/orig/psd-d/ /opt/src/psd-d/
 rsync -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
 
@@ -72,6 +73,7 @@ dub add-local /opt/src/i2d-opengl/      "$(semver /opt/src/i2d-opengl/)"
 dub add-local /opt/src/inmath/          "$(semver /opt/src/inmath/)"
 dub add-local /opt/src/inochi2d/        "$(semver /opt/src/inochi2d/)"
 dub add-local /opt/src/inui/            "$(semver /opt/src/inui/)"
+dub add-local /opt/src/kra-d/           "$(semver /opt/src/kra-d/)"
 dub add-local /opt/src/psd-d/           "$(semver /opt/src/psd-d/)"
 dub add-local /opt/src/vmc-d/           "$(semver /opt/src/vmc-d/)"
 
