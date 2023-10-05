@@ -1,7 +1,7 @@
 diff --git a/res/inochi-creator.desktop b/res/inochi-creator.desktop
 index 80a920e..b210214 100644
---- a/res/inochi-creator.desktop
-+++ b/res/inochi-creator.desktop
+--- a/build-aux/linux/inochi-creator.desktop
++++ b/build-aux/linux/inochi-creator.desktop
 @@ -1,6 +1,6 @@
  [Desktop Entry]
  Name=inochi-creator

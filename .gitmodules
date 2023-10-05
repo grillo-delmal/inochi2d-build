@@ -19,9 +19,6 @@
 [submodule "src/fghj"]
 	path = src/fghj
 	url = https://github.com/Inochi2D/fghj.git
-[submodule "src/bindbc-imgui"]
-	path = src/bindbc-imgui
-	url = https://github.com/Inochi2D/bindbc-imgui.git
 [submodule "src/i18n"]
 	path = src/i18n
 	url = https://github.com/KitsunebiGames/i18n.git
@@ -37,3 +34,12 @@
 [submodule "src/inochi-session"]
 	path = src/inochi-session
 	url = https://github.com/Inochi2D/inochi-session.git
+[submodule "src/i2d-imgui"]
+	path = src/i2d-imgui
+	url = https://github.com/Inochi2D/i2d-imgui.git
+[submodule "src/i2d-opengl"]
+	path = src/i2d-opengl
+	url = https://github.com/Inochi2D/i2d-opengl.git
+[submodule "src/kra-d"]
+	path = src/kra-d
+	url = https://github.com/Inochi2D/kra-d.git

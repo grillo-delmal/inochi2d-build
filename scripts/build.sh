@@ -8,10 +8,10 @@ source /opt/build/semver.sh
 find /opt/out/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
 
 if [[ ! -z ${LOAD_CACHE} ]]; then
-    mkdir -p /opt/cache/src/
-    rsync -azh /opt/cache/src/ /opt/src/
     mkdir -p /opt/cache/.dub/
-    rsync -azh /opt/cache/.dub/ /opt/cache/.dub/
+    rsync -azh /opt/cache/.dub/ ~/.dub/
+
+    rm -f /opt/cache/.dub/packages/local-packages.json
 fi
 
 cd /opt
@@ -20,15 +20,17 @@ mkdir -p src
 rsync -azh /opt/orig/inochi-creator/ /opt/src/inochi-creator/
 rsync -azh /opt/orig/inochi-session/ /opt/src/inochi-session/
 
-rsync -azh /opt/orig/bindbc-imgui/ /opt/src/bindbc-imgui/
 rsync -azh /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
 rsync -azh /opt/orig/dportals/ /opt/src/dportals/
 rsync -azh /opt/orig/facetrack-d/ /opt/src/facetrack-d/
 rsync -azh /opt/orig/fghj/ /opt/src/fghj/
 rsync -azh /opt/orig/i18n/ /opt/src/i18n/
+rsync -azh /opt/orig/i2d-imgui/ /opt/src/i2d-imgui/
+rsync -azh /opt/orig/i2d-opengl/ /opt/src/i2d-opengl/
 rsync -azh /opt/orig/inmath/ /opt/src/inmath/
 rsync -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
 rsync -azh /opt/orig/inui/ /opt/src/inui/
+rsync -azh /opt/orig/kra-d/ /opt/src/kra-d/
 rsync -azh /opt/orig/psd-d/ /opt/src/psd-d/
 rsync -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
 
@@ -74,25 +76,36 @@ enum IN_VERSION = "$(semver /opt/src/inochi2d/)";
 EOF
 
 # Add dlang deps
-dub add-local /opt/src/bindbc-imgui/    "$(semver /opt/src/bindbc-imgui/)"
 dub add-local /opt/src/bindbc-spout2/   "$(semver /opt/src/bindbc-spout2/)"
 dub add-local /opt/src/dportals/        "$(semver /opt/src/dportals/)"
 dub add-local /opt/src/facetrack-d/     "$(semver /opt/src/facetrack-d/)"
 dub add-local /opt/src/fghj/            "$(semver /opt/src/fghj/)"
 dub add-local /opt/src/i18n/            "$(semver /opt/src/i18n/)"
+dub add-local /opt/src/i2d-imgui/       "$(semver /opt/src/i2d-imgui/)"
+dub add-local /opt/src/i2d-opengl/      "$(semver /opt/src/i2d-opengl/)"
 dub add-local /opt/src/inmath/          "$(semver /opt/src/inmath/)"
-dub add-local /opt/src/inochi2d/        "$(semver /opt/src/inochi2d/ 0.8.0)"
-dub add-local /opt/src/inui/            "$(semver /opt/src/inui/ 1.0.0)"
+dub add-local /opt/src/inochi2d/        "$(semver /opt/src/inochi2d/)"
+dub add-local /opt/src/inui/            "$(semver /opt/src/inui/)"
+dub add-local /opt/src/kra-d/           "$(semver /opt/src/kra-d/)"
 dub add-local /opt/src/psd-d/           "$(semver /opt/src/psd-d/)"
 dub add-local /opt/src/vmc-d/           "$(semver /opt/src/vmc-d/)"
 
-# Build bindbc-imgui deps
-pushd src
-pushd bindbc-imgui
-mkdir -p deps/build_linux_x64_cimguiStatic
-mkdir -p deps/build_linux_x64_cimguiDynamic
-
 if [[ ! -z ${PREBUILD_IMGUI} ]]; then
+
+    # Build i2d-imgui deps
+    pushd src
+    pushd i2d-imgui
+
+    if [[ ! -z ${LOAD_CACHE} ]]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ ./deps/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/ ./deps/
+    fi
+
+    mkdir -p deps/build_linux_x64_cimguiStatic
+    mkdir -p deps/build_linux_x64_cimguiDynamic
+
     echo "======== Prebuild imgui ========"
 
     ARCH=$(uname -m)
@@ -125,11 +138,11 @@ if [[ ! -z ${PREBUILD_IMGUI} ]]; then
             cmake -DCMAKE_BUILD_TYPE=Debug -S deps -B deps/build_linux_aarch64_cimguiDynamic
             cmake --build deps/build_linux_aarch64_cimguiDynamic --config Debug
         fi
-    fi
-fi
 
-popd
-popd
+    fi
+    popd
+    popd
+fi
 
 if [[ ! -z ${CREATOR} ]]; then
     echo "======== Starting creator ========"
@@ -142,11 +155,8 @@ if [[ ! -z ${CREATOR} ]]; then
     rm -rf res/Inochi-Creator.iconset/
     find res/ui/ -type f -not -name "grid.png" -delete
     rm res/icon.png
-    rm res/Info.plist
     rm res/logo.png
     rm res/logo_256.png
-    rm res/inochi-creator.ico
-    rm res/inochi-creator.rc
     rm res/shaders/ada.frag
     rm res/shaders/ada.vert
 
@@ -168,7 +178,7 @@ if [[ ! -z ${CREATOR} ]]; then
         { time \
             dub describe \
                 --config=barebones \
-                --cache=local \
+                --cache=user \
                     2>&1 > /opt/out/creator-describe ; \
             }  2>> /opt/out/creator-stats 
         echo "" >> /opt/out/creator-stats 
@@ -178,7 +188,7 @@ if [[ ! -z ${CREATOR} ]]; then
     { time \
         dub build \
             --config=barebones \
-            --cache=local \
+            --cache=user \
                 2>&1 ; \
         } 2>> /opt/out/creator-stats 
     popd
@@ -191,6 +201,7 @@ if [[ ! -z ${SESSION} ]]; then
     # Build inochi-session
     pushd src
     pushd inochi-session
+    mkdir -p out
     if [[ ! -z ${DEBUG} ]]; then
         export DFLAGS='-g --d-debug'
     fi
@@ -201,7 +212,7 @@ if [[ ! -z ${SESSION} ]]; then
         { time \
             dub describe \
                 --config=barebones \
-                --cache=local \
+                --cache=user \
                 --override-config=facetrack-d/web-adaptors \
                     2>&1 > /opt/out/session-describe ; \
             }  2>> /opt/out/session-stats
@@ -212,7 +223,7 @@ if [[ ! -z ${SESSION} ]]; then
     { time \
         dub build \
             --config=barebones \
-            --cache=local \
+            --cache=user \
             --override-config=facetrack-d/web-adaptors \
                 2>&1 ; \
         } 2>> /opt/out/session-stats

@@ -1,5 +1,5 @@
 /**
-    Copyright © 2020, Inochi2D Project
+    Copyright © 2020-2023, Inochi2D Project
     Distributed under the 2-Clause BSD License, see LICENSE file.
     
     Authors: Luna Nielsen
@@ -20,7 +20,7 @@ module creator.config;
     If you change the banner you SHOULD change this.
 */
 enum INC_BANNER_ARTIST_NAME = "";
-enum INC_BANNER_ARTIST_PAGE = "https://github.com/grillo-delmal/";
+enum INC_BANNER_ARTIST_PAGE = "";
 
 /**
     URI for bug reports, for unofficial builds this SHOULD be changed.
@@ -31,4 +31,31 @@ enum INC_BUG_REPORT_URI = "https://github.com/grillo-delmal/inochi-creator-rpm/i
     URI for feature requests, for the most part this doesn't need to be changed
     unless you're making a fork.
 */
-enum INC_FEATURE_REQ_URI = "https://github.com/Inochi2D/inochi-creator/issues/new?assignees=&labels=enhancement&template=feature_request.yml&title=%5BFeature+Request%5D";
+enum INC_FEATURE_REQ_URI = "https://github.com/grillo-delmal/inochi-creator-rpm/issues/new?assignees=&labels=enhancement&template=feature_request.yml&title=%5BFeature+Request%5D";
+
+/**
+    URI to website for the project, change this if you fork the project.
+*/
+enum INC_INFO_WEBSITE_URI = "https://github.com/grillo-delmal/inochi-creator-rpm/";
+
+/**
+    URI to documentation provided for this software, by default it'll direct to the Inochi2D Documentation
+
+    If you modify the software by adding new features it's highly recommended that you change this link to
+    documentation which fits with the new featureset.
+*/
+enum INC_INFO_DOCS_URI = "https://docs.inochi2d.com/";
+
+/**
+    URI to the discord server where support is provided.
+
+    Set to "" to disable the link.
+*/
+enum INC_INFO_DISCORD_URI = "";
+
+/**
+    Whether to show donation links.
+
+    These are hardcoded, if you're forking the project set this to false.
+*/
+enum INC_INFO_SHOW_DONATE_LINKS = false;
