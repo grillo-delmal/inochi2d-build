@@ -188,6 +188,7 @@ if [[ ! -z ${SESSION} ]]; then
     # Build inochi-session
     pushd src
     pushd inochi-session
+    mkdir -p out
     if [[ ! -z ${DEBUG} ]]; then
         export DFLAGS='-g --d-debug'
     fi
