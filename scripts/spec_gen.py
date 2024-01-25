@@ -290,7 +290,7 @@ class LibSpecFile(LibData):
                 ""
             ]))
             f.write('\n'.join([
-                "setgittag --rm -f -m v%{lib_gitver}",
+                "setgittag --rm -f v%{lib_gitver}",
                 ""
             ]))
             if len(self.file_sources) > 0:
@@ -346,10 +346,10 @@ class LibSpecFile(LibData):
 
             f.write('\n'.join([
                 "%install",
-                "mkdir -p %{buildroot}%{_includedir}/zdub/%{lib_name}-%{lib_gitver}",
+                "mkdir -p %{buildroot}%{_includedir}/zdub/%{lib_name}/%{lib_gitver}",
                 "cp -r "
                     ". "
-                    "%{buildroot}%{_includedir}/zdub/%{lib_name}-%{lib_gitver}/%{lib_name}",
+                    "%{buildroot}%{_includedir}/zdub/%{lib_name}/%{lib_gitver}/%{lib_name}",
                 ""
             ]))
             if len(self.install) > 0:
@@ -362,7 +362,7 @@ class LibSpecFile(LibData):
             f.write('\n'.join([
                 "%files devel",
                 "%license LICENSE",
-                "%{_includedir}/zdub/%{lib_name}-%{lib_gitver}/%{lib_name}/",
+                "%{_includedir}/zdub/%{lib_name}/%{lib_gitver}/%{lib_name}/",
                 ""
             ]))
             if len(self.files) > 0:

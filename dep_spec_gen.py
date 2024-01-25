@@ -9,7 +9,7 @@ from pathlib import Path
 from scripts.spec_gen import LibData, LibSpecFile
 
 data = {}
-with open("build_out/describe") as f:
+with open("build_out/creator-describe") as f:
     data = json.load(f)
 
 dep_graph = {
@@ -24,23 +24,26 @@ def find_deps(parent, dep_graph):
 
 deps = list(find_deps("inochi-creator", dep_graph))
 deps.sort()
+print("All deps", deps)
+
 
 # Find project libs
 project_libs = []
 project_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
-        if not dep_graph[name]['path'].startswith(
-            '/opt/src/inochi-creator') and \
+        if dep_graph[name]['path'].startswith(
+            '/opt/src/') and \
         name in deps}
 
 pd_names = list(project_deps.keys())
 pd_names.sort()
+print("Direct deps found", pd_names)
 
 for name in pd_names:
     NAME = project_deps[name]['name'].replace('-', '_').lower()
     SEMVER = project_deps[name]['version']
-    GITPATH = project_deps[name]['path'].replace("/opt","./")
+    GITPATH = project_deps[name]['path'].replace("/opt",".")
     COMMIT = subprocess.run(
         ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
@@ -75,12 +78,13 @@ indirect_libs = []
 indirect_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
-        if dep_graph[name]['path'].startswith(
-            '/opt/src/inochi-creator') and \
+        if not dep_graph[name]['path'].startswith(
+            '/opt/src/') and \
         name in deps}
 
 id_names = list(indirect_deps.keys())
 id_names.sort()
+print("Indirect deps found", id_names)
 
 true_deps = {}
 true_names = []
@@ -194,7 +198,7 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
         ""]))
 
     NAME = 'cimgui'
-    GITPATH = './src/bindbc-imgui/deps/cimgui'
+    GITPATH = './src/i2d-imgui/deps/cimgui'
     COMMIT = subprocess.run(
         ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
@@ -204,7 +208,7 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
         ""]))
 
     NAME = 'imgui'
-    GITPATH = './src/bindbc-imgui/deps/cimgui/imgui'
+    GITPATH = './src/i2d-imgui/deps/cimgui/imgui'
     COMMIT = subprocess.run(
         ['git', '-C', GITPATH, 'rev-parse', 'HEAD'],
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
@@ -476,14 +480,14 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
 
     spec.write('\n'.join([
         "tar -xzf %%{SOURCE%d}" % src_cnt,
-        "rm -r deps/bindbc-imgui/deps/cimgui", 
-        "mv cimgui-%{cimgui_commit} deps/bindbc-imgui/deps/cimgui",
+        "rm -r deps/i2d-imgui/deps/cimgui", 
+        "mv cimgui-%{cimgui_commit} deps/i2d-imgui/deps/cimgui",
         "",
         "tar -xzf %%{SOURCE%d}" % (src_cnt+1),
-        "rm -r deps/bindbc-imgui/deps/cimgui/imgui", 
-        "mv imgui-%{imgui_commit} deps/bindbc-imgui/deps/cimgui/imgui",
+        "rm -r deps/i2d-imgui/deps/cimgui/imgui", 
+        "mv imgui-%{imgui_commit} deps/i2d-imgui/deps/cimgui/imgui",
         "",
-        "pushd deps; pushd bindbc-imgui",
+        "pushd deps; pushd i2d-imgui",
         "",
         "rm -rf deps/freetype",
         "rm -rf deps/glbinding",
@@ -491,7 +495,7 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
         "rm -rf deps/SDL",
         "rm -rf deps/cimgui/imgui/examples/",
         "",
-        "# FIX: Make bindbc-imgui submodule checking only check cimgui",
+        "# FIX: Make i2d-imgui submodule checking only check cimgui",
         "rm .gitmodules",
         "cat > .gitmodules <<EOF",
         "[submodule \"deps/cimgui\"]",
@@ -547,12 +551,12 @@ with open("build_out/inochi-creator.spec", 'w') as spec:
     # INSTALL LICENSES
     spec.write('\n'.join([line[8:] for line in '''\
         # Dependency licenses
-        install -d ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/bindbc-imgui/cimgui/
-        install -p -m 644 ./deps/bindbc-imgui/deps/cimgui/LICENSE \\
-            ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/bindbc-imgui/cimgui/LICENSE
-        install -d ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/bindbc-imgui/imgui/
-        install -p -m 644 ./deps/bindbc-imgui/deps/cimgui/imgui/LICENSE.txt \\
-            ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/bindbc-imgui/imgui/LICENSE.txt
+        install -d ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/i2d-imgui/cimgui/
+        install -p -m 644 ./deps/i2d-imgui/deps/cimgui/LICENSE \\
+            ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/i2d-imgui/cimgui/LICENSE
+        install -d ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/i2d-imgui/imgui/
+        install -p -m 644 ./deps/i2d-imgui/deps/cimgui/imgui/LICENSE.txt \\
+            ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/./deps/i2d-imgui/imgui/LICENSE.txt
 
         install -d ${RPM_BUILD_ROOT}%{_datadir}/licenses/%{name}/deps/
         find ./deps/ -mindepth 1 -maxdepth 1 -exec \\
