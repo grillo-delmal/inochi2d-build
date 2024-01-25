@@ -1,22 +1,23 @@
-FROM fedora:38
+FROM fedora:39
 
-RUN dnf update -y \
-    && \
-    dnf groupinstall -y \
-        "Development Tools" \
-        "Development Libraries"
-RUN dnf update -y \
-    && \
-    dnf install -y \
+# Base stuff
+RUN dnf -y install \
+        git \
+        rsync
+
+# Install deps
+RUN dnf -y install \
         ldc \
-        rsync \
         cmake \
         gcc \
         gcc-c++ \
         SDL2-devel \
         freetype-devel \
         dub \
-        git
+        gettext \
+        dbus-devel \
+        libva-devel \
+        openssl-devel
 
 ADD scripts/build.sh /opt/build/build.sh
 ADD scripts/semver.sh /opt/build/semver.sh

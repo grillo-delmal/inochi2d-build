@@ -3,7 +3,7 @@
 import json
 import subprocess
 
-f = open("build_out/describe")
+f = open("build_out/creator-describe")
 
 data = json.load(f)
 
@@ -50,8 +50,7 @@ print('# Project maintained deps')
 project_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
-        if not dep_graph[name]['path'].startswith(
-            '/opt/src/inochi-creator') and \
+        if dep_graph[name]['path'].startswith('/opt/src') and \
         name in deps}
 
 pd_names = list(project_deps.keys())
@@ -77,8 +76,7 @@ print('# Indirect deps')
 indirect_deps = {
     name: dep_graph[name] 
         for name in dep_graph.keys() 
-        if dep_graph[name]['path'].startswith(
-            '/opt/src/inochi-creator') and \
+        if not dep_graph[name]['path'].startswith('/opt/src') and \
         name in deps}
 
 id_names = list(indirect_deps.keys())
