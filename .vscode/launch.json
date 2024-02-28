@@ -1,0 +1,58 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Launch Creator",
+            "program": "${workspaceRoot}/build_out/inochi-creator/inochi-creator",
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "initCommands": [
+                "settings append target.source-map /opt/src/inochi-creator/ ${workspaceRoot}/src/inochi-creator",
+                "settings append target.source-map /opt/src/bindbc-spout2/ ${workspaceRoot}/src/bindbc-spout2",
+                "settings append target.source-map /opt/src/dportals/ ${workspaceRoot}/src/dportals",
+                "settings append target.source-map /opt/src/facetrack-d/ ${workspaceRoot}/src/facetrack-d",
+                "settings append target.source-map /opt/src/fghj/ ${workspaceRoot}/src/fghj",
+                "settings append target.source-map /opt/src/i2d-imgui/ ${workspaceRoot}/src/i2d-imgui",
+                "settings append target.source-map /opt/src/i2d-opengl/ ${workspaceRoot}/src/i2d-opengl",
+                "settings append target.source-map /opt/src/i18n/ ${workspaceRoot}/src/i18n",
+                "settings append target.source-map /opt/src/inmath/ ${workspaceRoot}/src/inmath",
+                "settings append target.source-map /opt/src/inochi2d/ ${workspaceRoot}/src/inochi2d",
+                "settings append target.source-map /opt/src/inui/ ${workspaceRoot}/src/inui",
+                "settings append target.source-map /opt/src/kra-d/ ${workspaceRoot}/src/kra-d",
+                "settings append target.source-map /opt/src/psd-d/ ${workspaceRoot}/src/psd-d",
+                "settings append target.source-map /opt/src/vmc-d/ ${workspaceRoot}/src/vmc-d",
+                "settings show target.source-map"
+            ]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Launch Session",
+            "program": "${workspaceRoot}/build_out/inochi-session/inochi-session",
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "initCommands": [
+                "settings append target.source-map /opt/src/inochi-session/ ${workspaceRoot}/src/inochi-session",
+                "settings append target.source-map /opt/src/bindbc-spout2/ ${workspaceRoot}/src/bindbc-spout2",
+                "settings append target.source-map /opt/src/dportals/ ${workspaceRoot}/src/dportals",
+                "settings append target.source-map /opt/src/facetrack-d/ ${workspaceRoot}/src/facetrack-d",
+                "settings append target.source-map /opt/src/fghj/ ${workspaceRoot}/src/fghj",
+                "settings append target.source-map /opt/src/i2d-imgui/ ${workspaceRoot}/src/i2d-imgui",
+                "settings append target.source-map /opt/src/i2d-opengl/ ${workspaceRoot}/src/i2d-opengl",
+                "settings append target.source-map /opt/src/i18n/ ${workspaceRoot}/src/i18n",
+                "settings append target.source-map /opt/src/inmath/ ${workspaceRoot}/src/inmath",
+                "settings append target.source-map /opt/src/inochi2d/ ${workspaceRoot}/src/inochi2d",
+                "settings append target.source-map /opt/src/inui/ ${workspaceRoot}/src/inui",
+                "settings append target.source-map /opt/src/kra-d/ ${workspaceRoot}/src/kra-d",
+                "settings append target.source-map /opt/src/psd-d/ ${workspaceRoot}/src/psd-d",
+                "settings append target.source-map /opt/src/vmc-d/ ${workspaceRoot}/src/vmc-d",
+                "settings show target.source-map"
+            ]
+        }
+    ]
+}
