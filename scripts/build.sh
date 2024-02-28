@@ -7,13 +7,6 @@ source /opt/build/semver.sh
 # Clean out folder
 find /opt/out/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
 
-if [[ ! -z ${LOAD_CACHE} ]]; then
-    mkdir -p /opt/cache/.dub/
-    rsync -azh /opt/cache/.dub/ ~/.dub/
-
-    rm -f /opt/cache/.dub/packages/local-packages.json
-fi
-
 cd /opt
 mkdir -p src
 
@@ -34,14 +27,42 @@ rsync -azh /opt/orig/kra-d/ /opt/src/kra-d/
 rsync -azh /opt/orig/psd-d/ /opt/src/psd-d/
 rsync -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
 
-pushd patches
-for d in */ ; do
-    for p in ${d}*.patch; do
-        echo "patch /opt/patches/$p"
-        git -C /opt/src/${d} apply /opt/patches/$p
-    done
-done
-popd
+if [ -d ./patches ]; then
+    pushd patches
+    if [ ! -z "$(ls -A */ 2> /dev/null)" ]; then
+        for d in */ ; do
+            for p in ${d}*.patch; do
+                echo "patch /opt/patches/$p"
+                git -C /opt/src/${d} apply /opt/patches/$p
+            done
+        done
+    fi
+    popd
+fi
+
+if [[ ! -z ${LOAD_CACHE} ]]; then
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+    fi
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/ /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+    fi
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/ /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+    fi
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/ /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+    fi
+
+    mkdir -p /opt/cache/.dub/
+    rsync -azh /opt/cache/.dub/ ~/.dub/
+
+    rm -f /opt/cache/.dub/packages/local-packages.json
+fi
 
 cat > /opt/src/inochi-creator/source/creator/ver.d <<EOF
 module creator.ver;
@@ -82,13 +103,6 @@ if [[ ! -z ${PREBUILD_IMGUI} ]]; then
     # Build i2d-imgui deps
     pushd src
     pushd i2d-imgui
-
-    if [[ ! -z ${LOAD_CACHE} ]]; then
-        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic
-        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic
-        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ ./deps/
-        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/ ./deps/
-    fi
 
     mkdir -p deps/build_linux_x64_cimguiStatic
     mkdir -p deps/build_linux_x64_cimguiDynamic
