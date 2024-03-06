@@ -12,22 +12,22 @@ echo "======== Loading sources ========"
 cd /opt
 mkdir -p src
 
-rsync -azh /opt/orig/inochi-creator/ /opt/src/inochi-creator/
-rsync -azh /opt/orig/inochi-session/ /opt/src/inochi-session/
+rsync --info=progress2 -azh /opt/orig/inochi-creator/ /opt/src/inochi-creator/
+rsync --info=progress2 -azh /opt/orig/inochi-session/ /opt/src/inochi-session/
 
-rsync -azh /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
-rsync -azh /opt/orig/dportals/ /opt/src/dportals/
-rsync -azh /opt/orig/facetrack-d/ /opt/src/facetrack-d/
-rsync -azh /opt/orig/fghj/ /opt/src/fghj/
-rsync -azh /opt/orig/i18n/ /opt/src/i18n/
-rsync -azh /opt/orig/i2d-imgui/ /opt/src/i2d-imgui/
-rsync -azh /opt/orig/i2d-opengl/ /opt/src/i2d-opengl/
-rsync -azh /opt/orig/inmath/ /opt/src/inmath/
-rsync -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
-rsync -azh /opt/orig/inui/ /opt/src/inui/
-rsync -azh /opt/orig/kra-d/ /opt/src/kra-d/
-rsync -azh /opt/orig/psd-d/ /opt/src/psd-d/
-rsync -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
+rsync --info=progress2 -azh /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
+rsync --info=progress2 -azh /opt/orig/dportals/ /opt/src/dportals/
+rsync --info=progress2 -azh /opt/orig/facetrack-d/ /opt/src/facetrack-d/
+rsync --info=progress2 -azh /opt/orig/fghj/ /opt/src/fghj/
+rsync --info=progress2 -azh /opt/orig/i18n/ /opt/src/i18n/
+rsync --info=progress2 -azh /opt/orig/i2d-imgui/ /opt/src/i2d-imgui/
+rsync --info=progress2 -azh /opt/orig/i2d-opengl/ /opt/src/i2d-opengl/
+rsync --info=progress2 -azh /opt/orig/inmath/ /opt/src/inmath/
+rsync --info=progress2 -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
+rsync --info=progress2 -azh /opt/orig/inui/ /opt/src/inui/
+rsync --info=progress2 -azh /opt/orig/kra-d/ /opt/src/kra-d/
+rsync --info=progress2 -azh /opt/orig/psd-d/ /opt/src/psd-d/
+rsync --info=progress2 -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
 
 echo "======== Applying patches ========"
 
