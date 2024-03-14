@@ -185,22 +185,43 @@ if [[ ! -z ${CREATOR} ]]; then
     if [[ ! -z ${PREDOWNLOAD_LIBS} ]]; then
         echo "======== Downloading creator libs ========"
         echo "Download time" > /opt/out/creator-stats 
-        { time \
-            dub describe \
-                --config=barebones \
-                --cache=user \
-                    2>&1 > /opt/out/creator-describe ; \
-            }  2>> /opt/out/creator-stats 
+        if [[ -z ${LOAD_CACHE} ]]; then
+
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                        2>&1 > /opt/out/creator-describe ; \
+                }  2>> /opt/out/creator-stats 
+        else
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                    --skip-registry=all \
+                        2>&1 > /opt/out/creator-describe ; \
+                }  2>> /opt/out/creator-stats 
+        fi
         echo "" >> /opt/out/creator-stats 
     fi
     echo "======== Building creator ========"
     echo "Build time" >> /opt/out/creator-stats 
+    if [[ -z ${LOAD_CACHE} ]]; then
     { time \
         dub build \
             --config=barebones \
             --cache=user \
                 2>&1 ; \
         } 2>> /opt/out/creator-stats 
+    else
+        { time \
+            dub build \
+                --config=barebones \
+                --cache=user \
+                --skip-registry=all \
+                    2>&1 ; \
+            } 2>> /opt/out/creator-stats 
+    fi
     popd
     popd
 fi
@@ -219,24 +240,46 @@ if [[ ! -z ${SESSION} ]]; then
     if [[ ! -z ${PREDOWNLOAD_LIBS} ]]; then
         echo "======== Downloading session libs ========"
         echo "Download time" > /opt/out/session-stats 
-        { time \
-            dub describe \
-                --config=barebones \
-                --cache=user \
-                --override-config=facetrack-d/web-adaptors \
-                    2>&1 > /opt/out/session-describe ; \
-            }  2>> /opt/out/session-stats
+        if [[ -z ${LOAD_CACHE} ]]; then
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                    --override-config=facetrack-d/web-adaptors \
+                        2>&1 > /opt/out/session-describe ; \
+                }  2>> /opt/out/session-stats
+        else
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                    --override-config=facetrack-d/web-adaptors \
+                    --skip-registry=all \
+                        2>&1 > /opt/out/session-describe ; \
+                }  2>> /opt/out/session-stats
+        fi
         echo "" >> /opt/out/session-stats 
     fi
     echo "======== Building session ========"
     echo "Build time" >> /opt/out/session-stats 
-    { time \
-        dub build \
-            --config=barebones \
-            --cache=user \
-            --override-config=facetrack-d/web-adaptors \
-                2>&1 ; \
-        } 2>> /opt/out/session-stats
+    if [[ -z ${LOAD_CACHE} ]]; then
+        { time \
+            dub build \
+                --config=barebones \
+                --cache=user \
+                --override-config=facetrack-d/web-adaptors \
+                    2>&1 ; \
+            } 2>> /opt/out/session-stats
+    else
+        { time \
+            dub build \
+                --config=barebones \
+                --cache=user \
+                --override-config=facetrack-d/web-adaptors \
+                --skip-registry=all \
+                    2>&1 ; \
+            } 2>> /opt/out/session-stats
+    fi
     popd
     popd
 fi
@@ -267,8 +310,29 @@ dub list > /opt/out/version_dump
 if [[ ! -z ${SAVE_CACHE} ]]; then
     echo "======== Saving cache ========"
 
-    find /opt/cache/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
-    rsync --info=progress2 -azh /opt/src/ /opt/cache/src/ 
+    if [[ -z ${LOAD_CACHE} ]]; then
+        find /opt/cache/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
+    fi
+
+    mkdir -p /opt/cache/.dub/
     rsync --info=progress2 -azh ~/.dub/ /opt/cache/.dub/
+
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+    fi
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/  /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+    fi
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/  /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+    fi
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/ /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+    fi
+
 fi
 
