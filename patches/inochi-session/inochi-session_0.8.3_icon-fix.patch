@@ -1,0 +1,13 @@
+diff --git a/res/inochi-session.desktop b/res/inochi-session.desktop
+index afa972e..d45b742 100644
+--- a/build-aux/linux/inochi-session.desktop
++++ b/build-aux/linux/inochi-session.desktop
+@@ -1,6 +1,6 @@
+ [Desktop Entry]
+ Name=inochi-session
+ Exec=inochi-session
+-Icon=icon_x256
++Icon=inochi-session
+ Type=Application
+ Categories=Utility
+\ No newline at end of file

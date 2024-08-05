@@ -7,41 +7,42 @@ source /opt/build/semver.sh
 # Clean out folder
 find /opt/out/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
 
-if [[ ! -z ${LOAD_CACHE} ]]; then
-    mkdir -p /opt/cache/.dub/
-    rsync -azh /opt/cache/.dub/ ~/.dub/
-
-    rm -f /opt/cache/.dub/packages/local-packages.json
-fi
+echo "======== Loading sources ========"
 
 cd /opt
 mkdir -p src
 
-rsync -azh /opt/orig/inochi-creator/ /opt/src/inochi-creator/
-rsync -azh /opt/orig/inochi-session/ /opt/src/inochi-session/
+rsync --info=progress2 -azh /opt/orig/inochi-creator/ /opt/src/inochi-creator/
+rsync --info=progress2 -azh /opt/orig/inochi-session/ /opt/src/inochi-session/
 
-rsync -azh /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
-rsync -azh /opt/orig/dportals/ /opt/src/dportals/
-rsync -azh /opt/orig/facetrack-d/ /opt/src/facetrack-d/
-rsync -azh /opt/orig/fghj/ /opt/src/fghj/
-rsync -azh /opt/orig/i18n/ /opt/src/i18n/
-rsync -azh /opt/orig/i2d-imgui/ /opt/src/i2d-imgui/
-rsync -azh /opt/orig/i2d-opengl/ /opt/src/i2d-opengl/
-rsync -azh /opt/orig/inmath/ /opt/src/inmath/
-rsync -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
-rsync -azh /opt/orig/inui/ /opt/src/inui/
-rsync -azh /opt/orig/kra-d/ /opt/src/kra-d/
-rsync -azh /opt/orig/psd-d/ /opt/src/psd-d/
-rsync -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
+rsync --info=progress2 -azh /opt/orig/bindbc-spout2/ /opt/src/bindbc-spout2/
+rsync --info=progress2 -azh /opt/orig/dportals/ /opt/src/dportals/
+rsync --info=progress2 -azh /opt/orig/facetrack-d/ /opt/src/facetrack-d/
+rsync --info=progress2 -azh /opt/orig/fghj/ /opt/src/fghj/
+rsync --info=progress2 -azh /opt/orig/i18n/ /opt/src/i18n/
+rsync --info=progress2 -azh /opt/orig/i2d-imgui/ /opt/src/i2d-imgui/
+rsync --info=progress2 -azh /opt/orig/i2d-opengl/ /opt/src/i2d-opengl/
+rsync --info=progress2 -azh /opt/orig/inmath/ /opt/src/inmath/
+rsync --info=progress2 -azh /opt/orig/inochi2d/ /opt/src/inochi2d/
+rsync --info=progress2 -azh /opt/orig/inui/ /opt/src/inui/
+rsync --info=progress2 -azh /opt/orig/kra-d/ /opt/src/kra-d/
+rsync --info=progress2 -azh /opt/orig/psd-d/ /opt/src/psd-d/
+rsync --info=progress2 -azh /opt/orig/vmc-d/ /opt/src/vmc-d/
 
-pushd patches
-for d in */ ; do
-    for p in ${d}*.patch; do
-        echo "patch /opt/patches/$p"
-        git -C /opt/src/${d} apply /opt/patches/$p
-    done
-done
-popd
+echo "======== Applying patches ========"
+
+if [ -d ./patches ]; then
+    pushd patches
+    if [ ! -z "$(ls -A */ 2> /dev/null)" ]; then
+        for d in */ ; do
+            for p in ${d}*.patch; do
+                echo "patch /opt/patches/$p"
+                git -C /opt/src/${d} apply /opt/patches/$p
+            done
+        done
+    fi
+    popd
+fi
 
 pushd files
 for d in */ ; do
@@ -75,6 +76,35 @@ module inochi2d.ver;
 enum IN_VERSION = "$(semver /opt/src/inochi2d/)";
 EOF
 
+if [[ ! -z ${LOAD_CACHE} ]]; then
+
+    echo "======== Loading cache ========"
+
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+    fi
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/ /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+    fi
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/ /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+    fi
+    if [ -d /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic ]; then
+        mkdir -p /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/ /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+    fi
+
+    mkdir -p /opt/cache/.dub/
+    rsync --info=progress2 -azh /opt/cache/.dub/ ~/.dub/
+
+    rm -f /opt/cache/.dub/packages/local-packages.json
+fi
+
+echo "======== Loading dub dependencies ========"
+
 # Add dlang deps
 dub add-local /opt/src/bindbc-spout2/   "$(semver /opt/src/bindbc-spout2/)"
 dub add-local /opt/src/dportals/        "$(semver /opt/src/dportals/)"
@@ -92,21 +122,14 @@ dub add-local /opt/src/vmc-d/           "$(semver /opt/src/vmc-d/)"
 
 if [[ ! -z ${PREBUILD_IMGUI} ]]; then
 
+    echo "======== Prebuild imgui ========"
+
     # Build i2d-imgui deps
     pushd src
     pushd i2d-imgui
 
-    if [[ ! -z ${LOAD_CACHE} ]]; then
-        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic
-        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic
-        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ ./deps/
-        rsync -azh /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/ ./deps/
-    fi
-
     mkdir -p deps/build_linux_x64_cimguiStatic
     mkdir -p deps/build_linux_x64_cimguiDynamic
-
-    echo "======== Prebuild imgui ========"
 
     ARCH=$(uname -m)
     if [ "${ARCH}" == 'x86_64' ]; then
@@ -175,22 +198,43 @@ if [[ ! -z ${CREATOR} ]]; then
     if [[ ! -z ${PREDOWNLOAD_LIBS} ]]; then
         echo "======== Downloading creator libs ========"
         echo "Download time" > /opt/out/creator-stats 
-        { time \
-            dub describe \
-                --config=barebones \
-                --cache=user \
-                    2>&1 > /opt/out/creator-describe ; \
-            }  2>> /opt/out/creator-stats 
+        if [[ -z ${LOAD_CACHE} ]]; then
+
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                        2>&1 > /opt/out/creator-describe ; \
+                }  2>> /opt/out/creator-stats 
+        else
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                    --skip-registry=all \
+                        2>&1 > /opt/out/creator-describe ; \
+                }  2>> /opt/out/creator-stats 
+        fi
         echo "" >> /opt/out/creator-stats 
     fi
     echo "======== Building creator ========"
     echo "Build time" >> /opt/out/creator-stats 
+    if [[ -z ${LOAD_CACHE} ]]; then
     { time \
         dub build \
             --config=barebones \
             --cache=user \
                 2>&1 ; \
         } 2>> /opt/out/creator-stats 
+    else
+        { time \
+            dub build \
+                --config=barebones \
+                --cache=user \
+                --skip-registry=all \
+                    2>&1 ; \
+            } 2>> /opt/out/creator-stats 
+    fi
     popd
     popd
 fi
@@ -209,24 +253,46 @@ if [[ ! -z ${SESSION} ]]; then
     if [[ ! -z ${PREDOWNLOAD_LIBS} ]]; then
         echo "======== Downloading session libs ========"
         echo "Download time" > /opt/out/session-stats 
-        { time \
-            dub describe \
-                --config=barebones \
-                --cache=user \
-                --override-config=facetrack-d/web-adaptors \
-                    2>&1 > /opt/out/session-describe ; \
-            }  2>> /opt/out/session-stats
+        if [[ -z ${LOAD_CACHE} ]]; then
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                    --override-config=facetrack-d/web-adaptors \
+                        2>&1 > /opt/out/session-describe ; \
+                }  2>> /opt/out/session-stats
+        else
+            { time \
+                dub describe \
+                    --config=barebones \
+                    --cache=user \
+                    --override-config=facetrack-d/web-adaptors \
+                    --skip-registry=all \
+                        2>&1 > /opt/out/session-describe ; \
+                }  2>> /opt/out/session-stats
+        fi
         echo "" >> /opt/out/session-stats 
     fi
     echo "======== Building session ========"
     echo "Build time" >> /opt/out/session-stats 
-    { time \
-        dub build \
-            --config=barebones \
-            --cache=user \
-            --override-config=facetrack-d/web-adaptors \
-                2>&1 ; \
-        } 2>> /opt/out/session-stats
+    if [[ -z ${LOAD_CACHE} ]]; then
+        { time \
+            dub build \
+                --config=barebones \
+                --cache=user \
+                --override-config=facetrack-d/web-adaptors \
+                    2>&1 ; \
+            } 2>> /opt/out/session-stats
+    else
+        { time \
+            dub build \
+                --config=barebones \
+                --cache=user \
+                --override-config=facetrack-d/web-adaptors \
+                --skip-registry=all \
+                    2>&1 ; \
+            } 2>> /opt/out/session-stats
+    fi
     popd
     popd
 fi
@@ -255,8 +321,31 @@ fi
 dub list > /opt/out/version_dump
 
 if [[ ! -z ${SAVE_CACHE} ]]; then
-    find /opt/cache/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
-    rsync -azh /opt/src/ /opt/cache/src/ 
-    rsync -azh ~/.dub/ /opt/cache/.dub/
+    echo "======== Saving cache ========"
+
+    if [[ -z ${LOAD_CACHE} ]]; then
+        find /opt/cache/ -mindepth 1 -maxdepth 1 -exec rm -r -- {} +
+    fi
+
+    mkdir -p /opt/cache/.dub/
+    rsync --info=progress2 -azh ~/.dub/ /opt/cache/.dub/
+
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/ /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiStatic/
+    fi
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/  /opt/cache/src/i2d-imgui/deps/build_linux_x64_cimguiDynamic/
+    fi
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/  /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiStatic/
+    fi
+    if [ -d /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic ]; then
+        mkdir -p /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+        rsync --info=progress2 -azh /opt/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/ /opt/cache/src/i2d-imgui/deps/build_linux_aarch64_cimguiDynamic/
+    fi
+
 fi
 

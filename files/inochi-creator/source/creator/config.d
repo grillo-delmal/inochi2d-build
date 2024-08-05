@@ -20,6 +20,11 @@ module creator.config;
     If you change the banner you SHOULD change this.
 */
 enum INC_BANNER_ARTIST_NAME = "";
+
+/**
+    Link to the artist's preferred social media,
+    or art posting page.
+*/
 enum INC_BANNER_ARTIST_PAGE = "";
 
 /**
@@ -37,6 +42,11 @@ enum INC_FEATURE_REQ_URI = "https://github.com/grillo-delmal/inochi-creator-rpm/
     URI to website for the project, change this if you fork the project.
 */
 enum INC_INFO_WEBSITE_URI = "https://github.com/grillo-delmal/inochi-creator-rpm/";
+
+/**
+    URI to buy a copy, unused for non-official builds
+*/
+enum INC_INFO_BUY_URL = "";
 
 /**
     URI to documentation provided for this software, by default it'll direct to the Inochi2D Documentation
