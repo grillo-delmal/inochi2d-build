@@ -9,6 +9,9 @@
         "SDL2"
     ],
     "build_reqs": [
+        "cmake",
+        "gcc",
+        "gcc-c++",
         "freetype-devel",
         "SDL2-devel"
     ],

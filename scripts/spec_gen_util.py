@@ -59,12 +59,16 @@ class LibData:
                 "#FIXME: generate an actual description",
                 ""]
 
-        self.prep_file = spec_data["prep_file"] \
+        prep_name = spec_data["prep_name"] if "prep_name" in spec_data else self.name if self.semver is not None else "%{lib_name}"
+        self.prep_file = \
+            spec_data["prep_file"] \
             if "prep_file" in spec_data \
-            else "%s-%%{%s_commit}" % (
-                self.name, self.name.replace('-', '_').lower()) \
-                if semver is not None \
-                else "%{lib_name}-%{lib_gitver}"
+            else \
+                "%s-%%{%s_commit}" % (
+                    prep_name, self.name.replace('-', '_').lower()) \
+                if self.semver is not None \
+                else \
+                    "%s-%%{lib_gitver}" % prep_name
 
         self.macros = spec_data["macros"] \
             if "macros" in spec_data \

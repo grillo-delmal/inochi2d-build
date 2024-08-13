@@ -76,7 +76,7 @@ for name in pd_names:
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
     SOURCE_BASE_URL= subprocess.run(
         ['git', '-C', GITPATH, 'config', '--get', 'remote.origin.url'],
-        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()[:-4]
 
     extra_consts={}
 
@@ -140,7 +140,7 @@ for name in pd_names:
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
     SOURCE_BASE_URL= subprocess.run(
         ['git', '-C', GITPATH, 'config', '--get', 'remote.origin.url'],
-        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()[:-4]
 
     extra_consts={}
 
@@ -327,7 +327,8 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
     for lib in creator_project_libs:
         for file in Path("files/%s" % lib.name).glob("**/*"):
             if file.is_file():
-                shutil.copy(file, "build_out/rpms/inochi-creator-rpm/")
+                Path("build_out/rpms/inochi-creator-rpm/files/%s" % lib.name).mkdir(parents=True, exist_ok=True)
+                shutil.copy(file, "build_out/rpms/inochi-creator-rpm/files/%s/" % lib.name)
         for file in Path("patches/%s" % lib.name).glob("*.patch"):
             if file.is_file():
                 shutil.copy(file, "build_out/rpms/inochi-creator-rpm/")
@@ -439,9 +440,10 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
     spec.write('\n'.join([line[8:] for line in '''\
         URL:            https://github.com/grillo-delmal/inochi-creator-rpm
 
-        #https://github.com/Inochi2D/inochi-creator/archive/%{inochi_creator_commit}/%{name}-%{inochi_creator_short}.tar.gz
+        #https://github.com/Inochi2D/inochi-creator/archive/{inochi_creator_commit}/{name}-{inochi_creator_short}.tar.gz
         Source0:        %{name}-%{version}-norestricted.tar.gz
         Source1:        config.d
+        Source2:        icon.png
     
         '''.splitlines()]))
 
@@ -450,7 +452,7 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         "# Project maintained deps",
         ""]))
 
-    src_cnt = 2
+    src_cnt = 3
 
     for lib in creator_project_libs:
         spec.write('\n'.join([
@@ -473,9 +475,10 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         if len(lib.file_sources) > 0:
             for src in lib.file_sources:
                 spec.write('\n'.join([
-                    "Source%d:%s%s" % (
+                    "Source%d:%sfiles/%s/%s" % (
                         src_cnt, 
                         " " * (8 - math.floor(math.log10(src_cnt))), 
+                        lib.name,
                         src["name"]) ,
                     ""
                 ]))
@@ -524,6 +527,7 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         BuildRequires:  libappstream-glib
         BuildRequires:  git
 
+        BuildRequires:  zdub-dub-settings-hack
         '''.splitlines()]))
 
     spec.write('\n'.join([
@@ -596,9 +600,17 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         cp %{SOURCE1} source/creator/
         cp res/ui/grid.png res/ui/banner.png
 
+        # FIX: Add fake dependency
+        mkdir -p deps/vibe-d
+        cat > deps/vibe-d/dub.sdl <<EOF
+        name "vibe-d"
+        subpackage "http"
+        EOF
+        dub add-local deps/vibe-d "0.9.5"
+
         '''.splitlines()]))
 
-    src_cnt = 2
+    src_cnt = 3
     ptch_cnt = 0
 
     patch_list = []
@@ -607,7 +619,7 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         patch_list.sort()
     for file in patch_list:
         spec.write('\n'.join([
-            "%%patch%d -p1 -b .%s-%s" % (
+            "%%patch -P %d -p1 -b .%s-%s" % (
                 ptch_cnt,
                 *list(file.name[:-6].split("_")[0::2])),
             ""
@@ -616,7 +628,7 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
 
     # PREP DEPS
     spec.write('\n'.join([line[8:] for line in '''\
-        mkdir deps
+        mkdir -p deps
 
         # Project maintained deps
         '''.splitlines()]))
@@ -632,54 +644,63 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         ]))
         src_cnt += 1
 
-        if len(lib.patches) > 0 or len(lib.prep) > 0 or len(lib.file_sources) > 0:
+        spec.write('\n')
+        spec.write('\n'.join([
+            "pushd deps; pushd %s" % lib.name,
+            ""
+            ]))
+        if len(lib.patches) > 0:
             spec.write('\n')
-            spec.write('\n'.join([
-                "pushd deps; pushd %s" % lib.name,
-                ""
+            for patch in lib.patches:
+                spec.write('\n'.join([
+                    "%%patch -P %d -p1 -b .%s-%s" % (
+                        ptch_cnt,
+                        *list(patch[:-6].split("_")[0::2])),
+                    ""
                 ]))
-            if len(lib.patches) > 0:
-                spec.write('\n')
-                for patch in lib.patches:
+                ptch_cnt += 1
+
+        if len(lib.file_sources) > 0:
+            spec.write("\n")
+            for i in range(len(lib.file_sources)):
+                if lib.file_sources[i]["path"] != ".":
                     spec.write('\n'.join([
-                        "%%patch%d -p1 -b .%s-%s" % (
-                            ptch_cnt,
-                            *list(patch[:-6].split("_")[0::2])),
+                        "mkdir -p ./%s" % lib.file_sources[i]["path"],
+                        "cp --force %%{SOURCE%d} ./%s/" % (src_cnt, lib.file_sources[i]["path"]),
                         ""
                     ]))
-                    ptch_cnt += 1
+                else:
+                    spec.write('\n'.join([
+                        "cp %%{SOURCE%d} ." % (src_cnt),
+                        ""
+                    ]))
+                src_cnt += 1
 
-            if len(lib.file_sources) > 0:
-                spec.write("\n")
-                for i in range(len(lib.file_sources)):
-                    if lib.file_sources[i]["path"] != ".":
-                        spec.write('\n'.join([
-                            "mkdir -p ./%s" % lib.file_sources[i]["path"],
-                            "cp --force %%{SOURCE%d} ./%s/" % (src_cnt, lib.file_sources[i]["path"]),
-                            ""
-                        ]))
-                    else:
-                        spec.write('\n'.join([
-                            "cp %%{SOURCE%d} ." % (src_cnt),
-                            ""
-                        ]))
-                    src_cnt += 1
-            if len(lib.prep) > 0:
-                prep = '\n'.join(lib.prep)
-                c = 1
-                while prep.find("%%{SOURCE%d}" % c) > 0:
-                    prep = prep.replace("%%{SOURCE%d}" % c, "%%{SOURCE%d}" % src_cnt)
-                    src_cnt += 1
-                    c += 1
+        if len(lib.prep) > 0:
+            prep = '\n'.join(lib.prep)
+            c = 1
+            while prep.find("%%{SOURCE%d}" % c) > 0:
+                prep = prep.replace("%%{SOURCE%d}" % c, "%%{SOURCE%d}" % src_cnt)
+                src_cnt += 1
+                c += 1
 
-                spec.write("\n")
-                spec.write(prep)
+            spec.write("\n")
+            spec.write(prep)
 
-            spec.write('\n'.join([
-                "",
-                "popd; popd",
-                ""
-                ]))
+
+        spec.write('\n'.join([
+            "",
+            "[ -f dub.sdl ] && dub convert -f json",
+            "mv -f dub.json dub.json.base",
+            "jq 'walk(if type == \"object\" then with_entries(select(.key | test(\"preBuildCommands*\") | not)) else . end)' dub.json.base > dub.json",
+            ""
+        ]))
+
+        spec.write('\n'.join([
+            "",
+            "popd; popd",
+            ""
+            ]))
 
         spec.write('\n')
 
@@ -710,12 +731,12 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         install -p ./out/inochi-creator ${RPM_BUILD_ROOT}%{_bindir}/inochi-creator
 
         install -d ${RPM_BUILD_ROOT}%{_datadir}/applications/
-        install -p -m 644 res/inochi-creator.desktop ${RPM_BUILD_ROOT}%{_datadir}/applications/inochi-creator.desktop
+        install -p -m 644 ./build-aux/linux/inochi-creator.desktop ${RPM_BUILD_ROOT}%{_datadir}/applications/inochi-creator.desktop
         desktop-file-validate \\
             ${RPM_BUILD_ROOT}%{_datadir}/applications/inochi-creator.desktop
 
         install -d ${RPM_BUILD_ROOT}%{_metainfodir}/
-        install -p -m 644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_metainfodir}/inochi-creator.appdata.xml
+        install -p -m 644 ./build-aux/linux/inochi-creator.appdata.xml ${RPM_BUILD_ROOT}%{_metainfodir}/inochi-creator.appdata.xml
         appstream-util validate-relax --nonet \\
             ${RPM_BUILD_ROOT}%{_metainfodir}/inochi-creator.appdata.xml
 
@@ -1002,7 +1023,7 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         patch_list.sort()
     for file in patch_list:
         spec.write('\n'.join([
-            "%%patch%d -p1 -b .%s-%s" % (
+            "%%patch -P %d -p1 -b .%s-%s" % (
                 ptch_cnt,
                 *list(file.name[:-6].split("_")[0::2])),
             ""
@@ -1036,7 +1057,7 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
                 spec.write('\n')
                 for patch in lib.patches:
                     spec.write('\n'.join([
-                        "%%patch%d -p1 -b .%s-%s" % (
+                        "%%patch -P %d -p1 -b .%s-%s" % (
                             ptch_cnt,
                             *list(patch[:-6].split("_")[0::2])),
                         ""

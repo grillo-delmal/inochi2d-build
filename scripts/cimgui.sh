@@ -4,12 +4,12 @@ function check_local_imgui() {
 
     [ ! -d /opt/deps/i2d-imgui ] && return
 
-    echo "======== Checking imgui version ========"
+    echo "======== Checking local imgui version ========"
     I2D_IMGUI_VERSION=$(semver /opt/deps/i2d-imgui)
     A=($(git -C /opt/deps/i2d-imgui submodule status deps/cimgui)/ //)
-    CIMGUI_COMMIT=${A[0]:1}
+    CIMGUI_COMMIT=${A[0]}
     A=($(git -C /opt/deps/i2d-imgui/deps/cimgui/ submodule status imgui)/ //)
-    IMGUI_COMMIT=${A[0]:1}
+    IMGUI_COMMIT=${A[0]}
 
     I2D_IMGUI_LIB_PATH=/opt/deps/i2d-imgui
 
@@ -27,7 +27,7 @@ function check_dub_i2d_imgui() {
 
     [ -d /opt/deps/i2d-imgui ] && return
 
-    echo "======== Checking imgui version ========"
+    echo "======== Checking remote imgui version ========"
 
     pushd /tmp
 
@@ -45,7 +45,7 @@ function check_dub_i2d_imgui() {
 
     popd
 
-    I2D_IMGUI_LIB_PATH=~/.dub/packages/i2d-imgui*/${I2D_IMGUI_VERSION}/i2d-imgui/
+    I2D_IMGUI_LIB_PATH=~/.dub/packages/i2d-imgui/${I2D_IMGUI_VERSION}/i2d-imgui/
 
 cat > /opt/out/i2d-imgui-state <<EOF
 {

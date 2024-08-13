@@ -280,6 +280,7 @@ EOF
     rm res/logo_256.png
     rm res/shaders/ada.frag
     rm res/shaders/ada.vert
+    cp res/ui/grid.png res/ui/banner.png
 
     # Replace files
     rm source/creator/config.d
