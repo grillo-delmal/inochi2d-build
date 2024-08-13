@@ -255,6 +255,7 @@ for name in true_names:
         shutil.copy(file, "build_out/rpms/zdub-deps/zdub-%s/" % name)
 
     id_deps = set()
+    SEMVER = None
 
     if name in creator_true_names:
         # Find creator lib dependencies
@@ -263,16 +264,17 @@ for name in true_names:
         for dep in creator_true_deps[name]:
             id_deps = id_deps.union(set(creator_dep_graph[dep["name"]]['dependencies']))
             SEMVER = dep["semver"]
-            pass
 
-    elif name in session_true_names:
+    if name in session_true_names:
         # Find session lib dependencies
         SEMVER = session_true_deps[name][0]["semver"]
 
         for dep in session_true_deps[name]:
             id_deps = id_deps.union(set(session_dep_graph[dep["name"]]['dependencies']))
-            SEMVER = dep["semver"]
-            pass
+            if SEMVER is None:
+                SEMVER = dep["semver"]
+            elif SEMVER != dep["semver"]:
+                print("WARNING!!!: Dependency inconsistency %s %s" % (SEMVER, dep["semver"]))
 
     for dep in list(id_deps):
         dep_truename = dep.split(":")[0]
