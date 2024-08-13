@@ -1207,7 +1207,7 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
             ${RPM_BUILD_ROOT}%{_metainfodir}/inochi-session.appdata.xml
 
         install -d $RPM_BUILD_ROOT/%{_datadir}/icons/hicolor/256x256/apps/
-        install -p -m 644 %{SOURCE2} $RPM_BUILD_ROOT/%{_datadir}/icons/hicolor/256x256/apps/inochi-session.png
+        install -p -m 644 %{SOURCE1} $RPM_BUILD_ROOT/%{_datadir}/icons/hicolor/256x256/apps/inochi-session.png
 
         '''.splitlines()]))
     
