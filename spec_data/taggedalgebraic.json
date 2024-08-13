@@ -1,5 +1,0 @@
-{
-    "licenses": ["MIT"],
-    "url": "https://github.com/s-ludwig/taggedalgebraic",
-    "source": "https://github.com/s-ludwig/taggedalgebraic/archive/refs/tags/v%{lib_gitver}/taggedalgebraic-%{lib_gitver}.tar.gz"
-}

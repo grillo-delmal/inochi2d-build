@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 class LibData:
-    def __init__(self, name, deps, gitver, semver = None, dist = 0, commit = "0000000"):
+    def __init__(self, name, deps, gitver, semver = None, dist = 0, commit = "0000000", source=None, extra_consts={}):
 
         # Try load specfile data
         try:
@@ -34,18 +34,19 @@ class LibData:
             self.semver = self.gitver
         else:
             self.semver = semver
+        self.extra_consts = extra_consts
         self.dist = dist
         self.commit = commit
         self.deps = deps
         self.deps.sort()
 
-        self.summary = self.summary = spec_data["summary"] \
+        self.summary = spec_data["summary"] \
             if "summary" in spec_data \
             else "%{lib_name} library for D"
             
-        self.licenses = set(spec_data["licenses"] \
+        self.licenses = sorted(set(spec_data["licenses"] \
             if "licenses" in spec_data \
-            else ["BSD-2-Clause"])
+            else ["BSD-2-Clause"]))
 
         self.url = spec_data["url"] \
             if "url" in spec_data \
@@ -73,15 +74,14 @@ class LibData:
             if "vars" in spec_data \
             else {}
 
-        self.source = spec_data["source"] \
-            if "source" in spec_data \
-            else \
-                "https://github.com/Inochi2D/%s" \
-                "/archive/%%{%s_commit}" \
-                "/%s-%%{%s_short}.tar.gz" % (
-                    self.name, self.name.replace('-', '_').lower(),
-                    self.name, self.name.replace('-', '_').lower()
-                )
+        self.source = source \
+            if source is not None \
+            else ( \
+                spec_data["source"] \
+                if "source" in spec_data \
+                else \
+                    "https://code.dlang.org/packages/" \
+                    "%{lib_name}/%{lib_gitver}.zip")
         self.ex_sources = spec_data["ex_sources"] \
             if "ex_sources" in spec_data \
             else []
@@ -159,6 +159,14 @@ class LibSpecFile(LibData):
                         self.vars[key]) ,
                     ""
                 ]))
+            for key in self.extra_consts.keys():
+                f.write('\n'.join([
+                    "%%define %s%s %s" % (
+                        key,
+                        " " * (13-len(key)),
+                        self.extra_consts[key]) ,
+                    ""
+                ]))
             f.write('\n'.join([
                 "",
                 "%if 0%{lib_dist} > 0",
@@ -197,6 +205,7 @@ class LibSpecFile(LibData):
                         src) ,
                     ""
                 ]))
+                src_cnt += 1
 
             if len(self.file_sources) > 0:
                 for src in self.file_sources:
@@ -207,6 +216,7 @@ class LibSpecFile(LibData):
                             src["name"]) ,
                         ""
                     ]))
+                src_cnt += 1
 
             if len(self.patches) > 0:
                 f.write("\n")
@@ -223,10 +233,10 @@ class LibSpecFile(LibData):
             # Build Requirements
 
             f.write('\n'.join([
-                "BuildRequires:  setgittag",
                 "BuildRequires:  git",
                 "BuildRequires:  ldc",
                 "BuildRequires:  dub",
+                "BuildRequires:  jq",
                 ""
             ]))
             for dep in self.deps:
@@ -290,7 +300,10 @@ class LibSpecFile(LibData):
                 ""
             ]))
             f.write('\n'.join([
-                "setgittag --rm -f v%{lib_gitver}",
+                "[ -f dub.sdl ] && dub convert -f json",
+                "mv -f dub.json dub.json.base",
+                "jq '. += {\"version\": \"%s\"}' dub.json.base > dub.json.ver" % self.semver,
+                "jq 'walk(if type == \"object\" then with_entries(select(.key | test(\"preBuildCommands*\") | not)) else . end)' dub.json.ver > dub.json",
                 ""
             ]))
             if len(self.file_sources) > 0:
@@ -334,7 +347,11 @@ class LibSpecFile(LibData):
                 f.write('\n'.join(self.check))
             else:
                 f.write('\n'.join([
-                    "dub build",
+                    "dub build \\",
+                    "    --cache=local --temp-build \\",
+                    "    --skip-registry=all \\",
+                    "    --compiler=ldc2 \\",
+                    "    --deep",
                     "dub clean",
                     ""
                 ]))

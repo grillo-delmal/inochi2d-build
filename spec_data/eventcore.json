@@ -1,29 +1,21 @@
 {
     "licenses": ["MIT"],
     "url": "https://github.com/vibe-d/eventcore",
-    "source": "https://github.com/vibe-d/eventcore/archive/refs/tags/v%{lib_gitver}/eventcore-%{lib_gitver}.tar.gz",
     "prep":[
+        "mv dub.json dub.json.async",
+        "jq 'walk(if type == \"object\" then with_entries(select(.key | test(\"libasync\") | not)) else . end)' dub.json.async > dub.json",
+        "",
         "mv LICENSE.txt LICENSE",
-        "",
-        "#FIXME: libasync is not packaged",
-        "mkdir -p libasync",
-        "echo \"name \\\"libasync\\\"\" > libasync/dub.sdl",
-        "pushd libasync",
-        "setgittag -m --rm -f v0.8.2",
-        "popd",
-        "",
-        "mkdir -p /builddir/.dub/packages/libasync-0.8.2",
-        "mv ./libasync /builddir/.dub/packages/libasync-0.8.2/libasync",
         ""
     ],
-    "install":[
-        "mkdir -p %{buildroot}%{_includedir}/zdub/libasync-0.8.2",
-        "cp -r /builddir/.dub/packages/libasync-0.8.2/libasync %{buildroot}%{_includedir}/zdub/libasync-0.8.2/libasync",
-        ""
-    ],
-    "files":[
-        "%{_includedir}/zdub/libasync-0.8.2/",
+    "check" : [
+        "dub build \\",
+        "    --config=epoll \\",
+        "    --cache=local --temp-build \\",
+        "    --skip-registry=all \\",
+        "    --compiler=ldc2 \\",
+        "    --deep",
+        "dub clean",
         ""
     ]
-
 }

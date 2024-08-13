@@ -1,11 +1,11 @@
 {
     "licenses": ["OpenSSL"],
     "url": "https://github.com/D-Programming-Deimos/openssl",
-    "source": "https://github.com/D-Programming-Deimos/openssl/archive/refs/tags/v%{lib_gitver}/openssl-%{lib_gitver}.tar.gz",
     "build_reqs" : ["openssl-devel"],
     "requires" : ["openssl-devel"],
     "build": [
         "ldc2 -run scripts/generate_version.d",
         ""
-    ]
+    ],
+    "check": [""]
 }

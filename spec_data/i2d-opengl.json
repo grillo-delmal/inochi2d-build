@@ -1,6 +1,5 @@
 {
     "licenses": ["BSL-1.0"],
-    "url": "https://github.com/BindBC/bindbc-loader",
     "prep":[
         "mv LICENSE_1_0.txt LICENSE",
         ""

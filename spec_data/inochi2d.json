@@ -1,4 +1,5 @@
 {
+    "source": "https://github.com/Inochi2D/inochi2d/archive/%{inochi2d_commit}/inochi2d-%{inochi2d_short}.tar.gz",
     "prep" : [
         "# FIX: Inochi2D version dependent on git",
         "cat > source/inochi2d/ver.d <<EOF",

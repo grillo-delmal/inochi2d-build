@@ -5,5 +5,15 @@
     "prep":[
         "mv LICENSE.txt LICENSE",
         ""
+    ],
+    "check" : [
+        "dub build \\",
+        "    --config=epoll \\",
+        "    --cache=local --temp-build \\",
+        "    --skip-registry=all \\",
+        "    --compiler=ldc2 \\",
+        "    --deep",
+        "dub clean",
+        ""
     ]
 }
