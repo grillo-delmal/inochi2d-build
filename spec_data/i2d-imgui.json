@@ -5,6 +5,7 @@
         "https://github.com/Inochi2D/imgui/archive/%{imgui_commit}/imgui-%{imgui_short}.tar.gz"
     ],
     "requires": [
+        "libstdc++",
         "freetype",
         "SDL2"
     ],

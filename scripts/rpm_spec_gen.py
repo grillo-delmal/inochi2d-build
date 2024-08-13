@@ -53,11 +53,11 @@ project_deps = {
             '/opt/deps/') and \
         name in creator_deps}
 
-pd_names = list(project_deps.keys())
-pd_names.sort()
-print("Direct creator deps found", pd_names)
+creator_pd_names = list(project_deps.keys())
+creator_pd_names.sort()
+print("Direct creator deps found", creator_pd_names)
 
-for name in pd_names:
+for name in creator_pd_names:
     NAME = project_deps[name]['name'].replace('-', '_').lower()
     SEMVER = project_deps[name]['version']
     GITPATH = project_deps[name]['path'].replace("/opt/deps","./src")
@@ -119,11 +119,11 @@ project_deps = {
             '/opt/deps/') and \
         name in session_deps}
 
-pd_names = list(project_deps.keys())
-pd_names.sort()
-print("Direct session deps found", pd_names)
+session_pd_names = list(project_deps.keys())
+session_pd_names.sort()
+print("Direct session deps found", session_pd_names)
 
-for name in pd_names:
+for name in session_pd_names:
     NAME = project_deps[name]['name'].replace('-', '_').lower()
     SEMVER = project_deps[name]['version']
     GITPATH = project_deps[name]['path'].replace("/opt/deps","./src")
@@ -532,6 +532,7 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         BuildRequires:  git
 
         BuildRequires:  zdub-dub-settings-hack
+
         '''.splitlines()]))
 
     spec.write('\n'.join([
@@ -540,6 +541,16 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
 
     spec.write('\n')
     spec.write('\n')
+
+    if "i2d-imgui" not in creator_pd_names:
+        spec.write('\n'.join([line[12:] for line in '''\
+            # static i2d-imgui reqs
+            BuildRequires:  gcc-c++
+            BuildRequires:  freetype-devel
+            BuildRequires:  SDL2-devel
+
+            '''.splitlines()]))
+
     for lib in creator_project_libs:
 
         if len(lib.build_reqs) > 0:
@@ -560,6 +571,19 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
     spec.write('\n')
 
     for lib in creator_project_libs:
+        if len(lib.requires) > 0:
+            spec.write('\n'.join([
+                "#%s deps" % lib.name ,
+                ""
+            ]))
+            for req in lib.requires:
+                spec.write('\n'.join([
+                    "Requires:       %s" % req ,
+                    ""
+                ]))
+            spec.write('\n')
+
+    for lib in creator_indirect_libs:
         if len(lib.requires) > 0:
             spec.write('\n'.join([
                 "#%s deps" % lib.name ,
@@ -995,6 +1019,7 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         BuildRequires:  git
 
         BuildRequires:  zdub-dub-settings-hack
+        
         '''.splitlines()]))
 
     spec.write('\n'.join([
@@ -1018,12 +1043,24 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
             spec.write('\n')
 
     spec.write('\n'.join([
-        "Requires:       luajit",
         "Requires:       hicolor-icon-theme",
         ""]))
     spec.write('\n')
 
     for lib in session_project_libs:
+        if len(lib.requires) > 0:
+            spec.write('\n'.join([
+                "#%s deps" % lib.name ,
+                ""
+            ]))
+            for req in lib.requires:
+                spec.write('\n'.join([
+                    "Requires:       %s" % req ,
+                    ""
+                ]))
+            spec.write('\n')
+
+    for lib in session_indirect_libs:
         if len(lib.requires) > 0:
             spec.write('\n'.join([
                 "#%s deps" % lib.name ,
