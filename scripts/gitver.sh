@@ -39,7 +39,7 @@ function git_build() {
     local BUILD=`echo $DESCRIBE | awk '{split($0,a,"-"); print a[2]}'`
 
     if [[ "${DESCRIBE}" =~ ^[A-Fa-f0-9]+$ ]]; then
-        BUILD=`git rev-list HEAD --count`
+        BUILD=`git -C $1 rev-list --count HEAD`
     fi
 
     if [ "${BUILD}" = "" ]; then
