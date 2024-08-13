@@ -76,7 +76,9 @@ for name in pd_names:
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
     SOURCE_BASE_URL= subprocess.run(
         ['git', '-C', GITPATH, 'config', '--get', 'remote.origin.url'],
-        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()[:-4]
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    if SOURCE_BASE_URL[-4:] == ".git":
+        SOURCE_BASE_URL = SOURCE_BASE_URL[:-4]
 
     extra_consts={}
 
@@ -140,7 +142,9 @@ for name in pd_names:
         stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
     SOURCE_BASE_URL= subprocess.run(
         ['git', '-C', GITPATH, 'config', '--get', 'remote.origin.url'],
-        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()[:-4]
+        stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
+    if SOURCE_BASE_URL[-4:] == ".git":
+        SOURCE_BASE_URL = SOURCE_BASE_URL[:-4]
 
     extra_consts={}
 
@@ -168,7 +172,7 @@ for name in pd_names:
             SEMVER, 
             GITDIST,
             COMMIT,
-            SOURCE_BASE_URL + "/archive/%%{%{name}_commit}/%{name}-%%{%{name}_short}.tar.gz",
+            SOURCE_BASE_URL + ("/archive/%%{%s_commit}/%s-%%{%s_short}.tar.gz" % (NAME, NAME, NAME)),
             extra_consts=extra_consts)            
         )
 
@@ -327,8 +331,7 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
     for lib in creator_project_libs:
         for file in Path("files/%s" % lib.name).glob("**/*"):
             if file.is_file():
-                Path("build_out/rpms/inochi-creator-rpm/files/%s" % lib.name).mkdir(parents=True, exist_ok=True)
-                shutil.copy(file, "build_out/rpms/inochi-creator-rpm/files/%s/" % lib.name)
+                shutil.copy(file, "build_out/rpms/inochi-creator-rpm/")
         for file in Path("patches/%s" % lib.name).glob("*.patch"):
             if file.is_file():
                 shutil.copy(file, "build_out/rpms/inochi-creator-rpm/")
@@ -475,10 +478,9 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
         if len(lib.file_sources) > 0:
             for src in lib.file_sources:
                 spec.write('\n'.join([
-                    "Source%d:%sfiles/%s/%s" % (
+                    "Source%d:%s%s" % (
                         src_cnt, 
                         " " * (8 - math.floor(math.log10(src_cnt))), 
-                        lib.name,
                         src["name"]) ,
                     ""
                 ]))
@@ -827,19 +829,29 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         "",
         ""]))
 
-    spec.write('\n'.join([
-        '# Project maintained deps',
-        ""]))
-
-    for lib in session_project_libs:
-        NAME = lib.name.replace('-', '_').lower()
-
+    if len(session_project_libs) > 0:
         spec.write('\n'.join([
-            "%%define %s_semver %s" % (NAME, lib.semver),
-            "%%define %s_commit %s" % (NAME, lib.commit),
-            "%%define %s_short %s" % (NAME, lib.commit[:7]),
-            "",
+            '# Project maintained deps',
             ""]))
+
+        for lib in session_project_libs:
+            NAME = lib.name.replace('-', '_').lower()
+
+            spec.write('\n'.join([
+                "%%define %s_semver %s" % (NAME, lib.semver),
+                "%%define %s_commit %s" % (NAME, lib.commit),
+                "%%define %s_short %s" % (NAME, lib.commit[:7]),
+                ""]))
+
+            for key in lib.extra_consts.keys():
+                spec.write('\n'.join([
+                    "%%define %s%s %s" % (
+                        key,
+                        " " * (13-len(key)),
+                        lib.extra_consts[key]) ,
+                    ""
+                ]))
+            spec.write('\n')
 
     # WRITING HEAD
     spec.write('\n'.join([line[8:] for line in '''\
@@ -850,7 +862,7 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         Name:           inochi-session
         Version:        %{inochi_session_ver}%{?inochi_session_suffix:}
         Release:        %autorelease
-        Summary:        Tool to create and edit Inochi2D puppets
+        Summary:        Tool to use Inochi2D puppets
 
         '''.splitlines()]))
 
@@ -897,21 +909,16 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
 
         #https://github.com/Inochi2D/inochi-session/archive/{inochi_session_commit}/{name}-{inochi_session_short}.tar.gz
         Source0:        %{name}-%{version}-norestricted.tar.gz
-        Source1:        inochi-session.appdata.xml
-        Source2:        icon.png
-        Source3:        config.d
-        Source4:        banner.png
-        Source5:        generate-tarball.sh
-        Source6:        README.md
+        Source1:        icon.png
     
         '''.splitlines()]))
 
     # OTHER SOURCES
     spec.write('\n'.join([
         "# Project maintained deps",
-        ""]))        
+        ""]))
 
-    src_cnt = 7
+    src_cnt = 2
 
     for lib in session_project_libs:
         spec.write('\n'.join([
@@ -922,6 +929,25 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
             ""
         ]))
         src_cnt += 1
+        for src in lib.ex_sources:
+            spec.write('\n'.join([
+                "Source%d:%s%s" % (
+                    src_cnt, 
+                    " " * (8 - math.floor(math.log10(src_cnt))), 
+                    src) ,
+                ""
+            ]))
+            src_cnt += 1
+        if len(lib.file_sources) > 0:
+            for src in lib.file_sources:
+                spec.write('\n'.join([
+                    "Source%d:%s%s" % (
+                        src_cnt, 
+                        " " * (8 - math.floor(math.log10(src_cnt))), 
+                        src["name"]) ,
+                    ""
+                ]))
+            src_cnt += 1
     spec.write('\n')
 
     # PATCHES
@@ -953,7 +979,6 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
             ]))
             ptch_cnt += 1
     spec.write('\n')
-    spec.write('\n')
 
     # DEPS
 
@@ -961,25 +986,54 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         # dlang
         BuildRequires:  ldc
         BuildRequires:  dub
+        BuildRequires:  jq
 
         BuildRequires:  desktop-file-utils
         BuildRequires:  libappstream-glib
         BuildRequires:  git
 
+        BuildRequires:  zdub-dub-settings-hack
         '''.splitlines()]))
 
     spec.write('\n'.join([
         "BuildRequires:  zdub-%s-static" % lib.name \
             for lib in session_indirect_libs]))
+
     spec.write('\n')
     spec.write('\n')
+    for lib in session_project_libs:
 
-    spec.write('\n'.join([line[8:] for line in '''\
-        Requires:       luajit
-        Requires:       hicolor-icon-theme
+        if len(lib.build_reqs) > 0:
+            spec.write('\n'.join([
+                "#%s deps" % lib.name ,
+                ""
+            ]))
+            for build_req in lib.build_reqs:
+                spec.write('\n'.join([
+                    "BuildRequires:  %s" % build_req ,
+                    ""
+                ]))
+            spec.write('\n')
 
+    spec.write('\n'.join([
+        "Requires:       luajit",
+        "Requires:       hicolor-icon-theme",
+        ""]))
+    spec.write('\n')
 
-        '''.splitlines()]))
+    for lib in session_project_libs:
+        if len(lib.requires) > 0:
+            spec.write('\n'.join([
+                "#%s deps" % lib.name ,
+                ""
+            ]))
+            for req in lib.requires:
+                spec.write('\n'.join([
+                    "Requires:       %s" % req ,
+                    ""
+                ]))
+            spec.write('\n')
+    spec.write('\n')
 
     spec.write('\n'.join([line[8:] for line in '''\
         %description
@@ -988,10 +1042,10 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         Inochi Session is a tool that lets you use Inochi2D puppets as tracked avatars.
         This is an unbranded build, unsupported by the official project.
 
+
         '''.splitlines()]))
 
     # PREP
-
     spec.write('\n'.join([line[8:] for line in '''\
         %prep
         %setup -n %{name}-%{inochi_session_commit}
@@ -1004,17 +1058,20 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         cat > source/session/ver.d <<EOF
         module session.ver;
 
-        enum INC_VERSION = "%{inochi_session_semver}";
+        enum INS_VERSION = "%{inochi_session_semver}";
         EOF
 
-        # FIX: Replace config.d and banner.png
-        rm source/session/config.d
-        cp %{SOURCE3} source/session/
-        cp %{SOURCE4} res/ui/banner.png
+        # FIX: Add fake dependency
+        mkdir -p deps/bindbc-spout2
+        cat > deps/bindbc-spout2/dub.sdl <<EOF
+        name "bindbc-spout2"
+        EOF
+        dub add-local deps/bindbc-spout2 "0.1.1"
+
 
         '''.splitlines()]))
 
-    src_cnt = 7
+    src_cnt = 2
     ptch_cnt = 0
 
     patch_list = []
@@ -1032,7 +1089,7 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
 
     # PREP DEPS
     spec.write('\n'.join([line[8:] for line in '''\
-        mkdir deps
+        mkdir -p deps
 
         # Project maintained deps
         '''.splitlines()]))
@@ -1046,47 +1103,79 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
                 lib.name, lib.name.replace('-', '_').lower()),
             ""
         ]))
-
-        if len(lib.patches) > 0 or len(lib.prep) > 0:
-            spec.write('\n')
-            spec.write('\n'.join([
-                "pushd deps; pushd %s" % lib.name,
-                ""
-                ]))
-            if len(lib.patches) > 0:
-                spec.write('\n')
-                for patch in lib.patches:
-                    spec.write('\n'.join([
-                        "%%patch -P %d -p1 -b .%s-%s" % (
-                            ptch_cnt,
-                            *list(patch[:-6].split("_")[0::2])),
-                        ""
-                    ]))
-                    ptch_cnt += 1
-
-            if len(lib.prep) > 0:
-                spec.write('\n')
-                spec.write('\n'.join(lib.prep))
-
-            spec.write('\n'.join([
-                "",
-                "popd; popd",
-                ""
-                ]))
+        src_cnt += 1
 
         spec.write('\n')
-        src_cnt += 1
+        spec.write('\n'.join([
+            "pushd deps; pushd %s" % lib.name,
+            ""
+            ]))
+        if len(lib.patches) > 0:
+            spec.write('\n')
+            for patch in lib.patches:
+                spec.write('\n'.join([
+                    "%%patch -P %d -p1 -b .%s-%s" % (
+                        ptch_cnt,
+                        *list(patch[:-6].split("_")[0::2])),
+                    ""
+                ]))
+                ptch_cnt += 1
+
+        if len(lib.file_sources) > 0:
+            spec.write("\n")
+            for i in range(len(lib.file_sources)):
+                if lib.file_sources[i]["path"] != ".":
+                    spec.write('\n'.join([
+                        "mkdir -p ./%s" % lib.file_sources[i]["path"],
+                        "cp --force %%{SOURCE%d} ./%s/" % (src_cnt, lib.file_sources[i]["path"]),
+                        ""
+                    ]))
+                else:
+                    spec.write('\n'.join([
+                        "cp %%{SOURCE%d} ." % (src_cnt),
+                        ""
+                    ]))
+                src_cnt += 1
+
+        if len(lib.prep) > 0:
+            prep = '\n'.join(lib.prep)
+            c = 1
+            while prep.find("%%{SOURCE%d}" % c) > 0:
+                prep = prep.replace("%%{SOURCE%d}" % c, "%%{SOURCE%d}" % src_cnt)
+                src_cnt += 1
+                c += 1
+
+            spec.write("\n")
+            spec.write(prep)
+
+
+        spec.write('\n'.join([
+            "",
+            "[ -f dub.sdl ] && dub convert -f json",
+            "mv -f dub.json dub.json.base",
+            "jq 'walk(if type == \"object\" then with_entries(select(.key | test(\"preBuildCommands*\") | not)) else . end)' dub.json.base > dub.json",
+            ""
+        ]))
+
+        spec.write('\n'.join([
+            "",
+            "popd; popd",
+            ""
+            ]))
+
+        spec.write('\n')
 
     spec.write('\n')
 
     # BUILD
     spec.write('\n'.join([line[8:] for line in '''\
         %build
-        export DFLAGS="%{_d_optflags}"
+        export DFLAGS="%{_d_optflags} -L-rpath=%{_libdir}/inochi-session/"
         dub build \\
             --cache=local \\
             --config=barebones \\
             --skip-registry=all \\
+            --non-interactive \\
             --temp-build \\
             --compiler=ldc2
         mkdir ./out/
@@ -1099,16 +1188,19 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
 
     spec.write('\n'.join([line[8:] for line in '''\
         %install
+        install -d ${RPM_BUILD_ROOT}%{_libdir}/inochi-session
+        install -p ./out/cimgui.so ${RPM_BUILD_ROOT}%{_libdir}/inochi-session/cimgui.so
+
         install -d ${RPM_BUILD_ROOT}%{_bindir}
         install -p ./out/inochi-session ${RPM_BUILD_ROOT}%{_bindir}/inochi-session
 
         install -d ${RPM_BUILD_ROOT}%{_datadir}/applications/
-        install -p -m 644 res/inochi-session.desktop ${RPM_BUILD_ROOT}%{_datadir}/applications/inochi-session.desktop
+        install -p -m 644 ./build-aux/linux/inochi-session.desktop ${RPM_BUILD_ROOT}%{_datadir}/applications/inochi-session.desktop
         desktop-file-validate \\
             ${RPM_BUILD_ROOT}%{_datadir}/applications/inochi-session.desktop
 
         install -d ${RPM_BUILD_ROOT}%{_metainfodir}/
-        install -p -m 644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_metainfodir}/inochi-session.appdata.xml
+        install -p -m 644 ./build-aux/linux/inochi-session.appdata.xml ${RPM_BUILD_ROOT}%{_metainfodir}/inochi-session.appdata.xml
         appstream-util validate-relax --nonet \\
             ${RPM_BUILD_ROOT}%{_metainfodir}/inochi-session.appdata.xml
 
@@ -1140,6 +1232,7 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         %license LICENSE
         %{_datadir}/licenses/%{name}/*
         %{_bindir}/inochi-session
+        %{_libdir}/inochi-session/*
         %{_metainfodir}/inochi-session.appdata.xml
         %{_datadir}/applications/inochi-session.desktop
         %{_datadir}/icons/hicolor/256x256/apps/inochi-session.png
@@ -1148,4 +1241,3 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
         %changelog
         %autochangelog
         '''.splitlines()][:-1]))
-
