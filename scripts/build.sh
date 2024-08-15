@@ -26,6 +26,15 @@ if [ -d ./orig-deps ]; then
                 ln -s /opt/deps/${d} /opt/src/${d::-1}
 
                 pushd /opt/deps/${d}
+
+                # Apply patches
+                if [ -d /opt/patches/${d} ]; then
+                    for p in /opt/patches/${d}*.patch; do
+                        echo "patch $p /opt/deps/$d"
+                        git apply $p
+                    done
+                fi
+
                 if [ -f dub.sdl ]; then
                     dub convert -f json
                 fi
@@ -38,6 +47,13 @@ if [ -d ./orig-deps ]; then
                 if [ $d == 'i2d-imgui/' ]; then
                     check_local_imgui
                 fi
+if [ $d == 'inochi2d/' ]; then
+cat > ./source/inochi2d/ver.d <<EOF
+module inochi2d.ver;
+
+enum IN_VERSION = "$(semver /opt/src/inochi2d/)";
+EOF
+fi
                 popd
 
                 dub add-local /opt/deps/${d}
@@ -58,12 +74,6 @@ if [ -d ./patches ]; then
                 for p in ${d}*.patch; do
                     echo "patch /opt/patches/$p"
                     git -C /opt/src/${d} apply /opt/patches/$p
-                done
-            fi
-            if [ -d /opt/deps/${d} ]; then
-                for p in ${d}*.patch; do
-                    echo "patch /opt/patches/$p"
-                    git -C /opt/deps/${d} apply /opt/patches/$p
                 done
             fi
         done
