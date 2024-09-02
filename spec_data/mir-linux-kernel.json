@@ -1,0 +1,10 @@
+{
+    "licenses": ["BSL-1.0"],
+    "url": "https://github.com/libmir/mir-linux-kernel",
+    "prep" : [
+        "# This file generates warnings because of the shebangs.",
+        "rm ./get_syscalls.py",
+        ""
+    ],
+    "check": [""]
+}

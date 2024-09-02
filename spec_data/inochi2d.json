@@ -1,0 +1,11 @@
+{
+    "prep" : [
+        "# FIX: Inochi2D version dependent on git",
+        "cat > source/inochi2d/ver.d <<EOF",
+        "module inochi2d.ver;",
+        "",
+        "enum IN_VERSION = \"%{lib_semver}\";",
+        "EOF",
+        ""
+    ]
+}

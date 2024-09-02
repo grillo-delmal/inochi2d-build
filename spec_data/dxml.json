@@ -1,0 +1,8 @@
+{
+    "licenses": ["BSL-1.0"],
+    "url": "https://github.com/jmdavis/dxml",
+    "prep":[
+        "mv LICENSE.txt LICENSE",
+        ""
+    ]
+}

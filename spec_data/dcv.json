@@ -1,0 +1,18 @@
+{
+    "licenses": ["BSL-1.0"],
+    "url": "https://github.com/libmir/dcv",
+    "prep":[
+        "mv LICENSE_1_0.txt LICENSE",
+        ""
+    ],
+    "check" : [
+        "dub build \\",
+        "    dcv:core \\",
+        "    --cache=local --temp-build \\",
+        "    --skip-registry=all \\",
+        "    --compiler=ldc2 \\",
+        "    --deep",
+        "dub clean",
+        ""
+    ]
+}

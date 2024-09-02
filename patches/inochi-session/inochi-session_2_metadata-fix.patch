@@ -1,0 +1,45 @@
+diff --git a/build-aux/linux/inochi-session.appdata.xml b/build-aux/linux/inochi-session.appdata.xml
+index 67b1c79..26abdcd 100644
+--- a/build-aux/linux/inochi-session.appdata.xml
++++ b/build-aux/linux/inochi-session.appdata.xml
+@@ -3,6 +3,9 @@
+   <id>inochi-session</id>
+   <launchable type="desktop-id">inochi-session.desktop</launchable>
+   <name>Inochi Session</name>
++  <developer id="com.inochi2d">
++    <name>Luna the Foxgirl</name>
++  </developer>
+   <metadata_license>CC0-1.0</metadata_license>
+   <project_license>BSD-2-Clause</project_license>
+   <summary>Tool for using Inochi2D puppets for streaming.</summary>
+@@ -14,17 +17,25 @@
+     <p>
+       Inochi Session is a tool that lets you use your Inochi2D models for live streaming.
+     </p>
++    <p>This build of the project doesn't include the original branding assets 
++      and it's not supported by the original project authors. 
++      If you have any issue, contact the package maintainer.</p>
+   </description>
+-  <url type="homepage">https://inochi2d.com</url>
+-  <url type="help">https://github.com/Inochi2D/inochi-session</url>
+-  <url type="bugtracker">https://github.com/Inochi2D/inochi-session/issues</url>
++  <url type="homepage">https://copr.fedorainfracloud.org/coprs/grillo-delmal/inochi2d/</url>
++  <url type="help">https://github.com/grillo-delmal/inochi-session-rpm</url>
++  <url type="bugtracker">https://github.com/grillo-delmal/inochi-session-rpm/issues</url>
+   <screenshots>
+     <screenshot type="default">
+       <caption>Title screen</caption>
+-      <image>https://user-images.githubusercontent.com/7032834/181119161-f83e8e57-2f9e-409f-90bd-1b1b9c047bcc.png</image>
++      <image type="source">https://user-images.githubusercontent.com/7032834/194462402-74c4a3e0-50ca-4b50-8e8d-164d97371f5a.png</image>
+     </screenshot>
+   </screenshots>
+   <categories>
+     <category>Graphics</category>
+   </categories>
++  <recommends>
++    <control>pointing</control>
++    <control>keyboard</control>
++  </recommends>
++  <content_rating type="oars-1.1"/>
+ </component>
+\ No newline at end of file

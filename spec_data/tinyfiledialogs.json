@@ -1,0 +1,5 @@
+{
+    "licenses": ["Zlib"],
+    "url": "https://github.com/dayllenger/tinyfiledialogs-d",
+    "prep_file": "tinyfiledialogs-d-%{lib_gitver}"
+}

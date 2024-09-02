@@ -4,7 +4,8 @@ FROM quay.io/fedora/fedora:40
 RUN dnf -y install \
         git \
         rsync \
-        patch
+        patch \
+        jq
 
 # Install deps
 RUN dnf -y install \
@@ -19,10 +20,3 @@ RUN dnf -y install \
         dbus-devel \
         libva-devel \
         openssl-devel
-
-ADD scripts/build.sh /opt/build/build.sh
-ADD scripts/semver.sh /opt/build/semver.sh
-
-WORKDIR /opt/build/
-
-CMD ./build.sh

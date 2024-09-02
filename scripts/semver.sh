@@ -14,7 +14,7 @@ function semver() {
 
     if [[ "${DESCRIBE}" =~ ^[A-Fa-f0-9]+$ ]]; then
         VERSION="0.0.0"
-        BUILD=`git rev-list HEAD --count`
+        BUILD=`git -C $1 rev-list --count HEAD`
         PATCH=${DESCRIBE}
     fi
 
