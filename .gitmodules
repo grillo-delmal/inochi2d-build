@@ -43,3 +43,6 @@
 [submodule "src/kra-d"]
 	path = src/kra-d
 	url = https://github.com/Inochi2D/kra-d.git
+[submodule "src/numem"]
+	path = src/numem
+	url = https://github.com/Inochi2D/numem/

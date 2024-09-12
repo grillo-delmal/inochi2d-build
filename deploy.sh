@@ -35,6 +35,7 @@ podman run -ti --rm \
     -v $(pwd)/src/i2d-opengl:/opt/orig-deps/i2d-opengl/:ro,Z \
     -v $(pwd)/src/inmath:/opt/orig-deps/inmath/:ro,Z \
     -v $(pwd)/src/kra-d:/opt/orig-deps/kra-d/:ro,Z \
+    -v $(pwd)/src/numem:/opt/orig-deps/numem/:ro,Z \
     -v $(pwd)/src/psd-d:/opt/orig-deps/psd-d/:ro,Z \
     -v $(pwd)/src/vmc-d:/opt/orig-deps/vmc-d/:ro,Z \
     -v $(pwd)/patches:/opt/patches/:ro,Z \
