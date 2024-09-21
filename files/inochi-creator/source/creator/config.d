@@ -69,3 +69,5 @@ enum INC_INFO_DISCORD_URI = "";
     These are hardcoded, if you're forking the project set this to false.
 */
 enum INC_INFO_SHOW_DONATE_LINKS = false;
+
+enum INC_RT_SHOW_DONATION_LINKS = false;

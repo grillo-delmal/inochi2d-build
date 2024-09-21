@@ -542,25 +542,28 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
     spec.write('\n')
     spec.write('\n')
 
-    if "i2d-imgui" not in creator_pd_names:
-        spec.write('\n'.join([line[12:] for line in '''\
-            # static i2d-imgui reqs
-            BuildRequires:  gcc-c++
-            BuildRequires:  freetype-devel
-            BuildRequires:  SDL2-devel
-
-            '''.splitlines()]))
-
     for lib in creator_project_libs:
-
         if len(lib.build_reqs) > 0:
             spec.write('\n'.join([
-                "#%s deps" % lib.name ,
+                "#%s reqs" % lib.name ,
                 ""
             ]))
             for build_req in lib.build_reqs:
                 spec.write('\n'.join([
                     "BuildRequires:  %s" % build_req ,
+                    ""
+                ]))
+            spec.write('\n')
+
+    for lib in creator_indirect_libs:
+        if len(lib.build_reqs) > 0:
+            spec.write('\n'.join([
+                "#%s reqs" % lib.name ,
+                ""
+            ]))
+            for build_req in lib.build_reqs:
+                spec.write('\n'.join([
+                    "BuildRequires:       %s" % build_req ,
                     ""
                 ]))
             spec.write('\n')
@@ -711,6 +714,10 @@ with open("build_out/rpms/inochi-creator-rpm/inochi-creator.spec", 'w') as spec:
                 prep = prep.replace("%%{SOURCE%d}" % c, "%%{SOURCE%d}" % src_cnt)
                 src_cnt += 1
                 c += 1
+
+            NAME = lib.name.replace('-', '_').lower()
+            if prep.find("%{lib_semver}") > 0:
+                prep = prep.replace("%{lib_semver}", "%%{%s_semver}" % NAME)
 
             spec.write("\n")
             spec.write(prep)
@@ -1029,15 +1036,27 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
     spec.write('\n')
     spec.write('\n')
     for lib in session_project_libs:
-
         if len(lib.build_reqs) > 0:
             spec.write('\n'.join([
-                "#%s deps" % lib.name ,
+                "#%s reqs" % lib.name ,
                 ""
             ]))
             for build_req in lib.build_reqs:
                 spec.write('\n'.join([
                     "BuildRequires:  %s" % build_req ,
+                    ""
+                ]))
+            spec.write('\n')
+
+    for lib in session_indirect_libs:
+        if len(lib.build_reqs) > 0:
+            spec.write('\n'.join([
+                "#%s reqs" % lib.name ,
+                ""
+            ]))
+            for build_req in lib.build_reqs:
+                spec.write('\n'.join([
+                    "BuildRequires:       %s" % build_req ,
                     ""
                 ]))
             spec.write('\n')
@@ -1093,7 +1112,6 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
 
     # GENERIC FIXES
     spec.write('\n'.join([line[8:] for line in '''\
-        # FIX: Inochi session version dependent on git
         cat > source/session/ver.d <<EOF
         module session.ver;
 
@@ -1183,6 +1201,10 @@ with open("build_out/rpms/inochi-session-rpm/inochi-session.spec", 'w') as spec:
                 prep = prep.replace("%%{SOURCE%d}" % c, "%%{SOURCE%d}" % src_cnt)
                 src_cnt += 1
                 c += 1
+
+            NAME = lib.name.replace('-', '_').lower()
+            if prep.find("%{lib_semver}") > 0:
+                prep = prep.replace("%{lib_semver}", "%%{%s_semver}" % NAME)
 
             spec.write("\n")
             spec.write(prep)
