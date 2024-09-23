@@ -310,7 +310,7 @@ class LibSpecFile(LibData):
             f.write('\n'.join([
                 "[ -f dub.sdl ] && dub convert -f json",
                 "mv -f dub.json dub.json.base",
-                "jq '. += {\"version\": \"%s\"}' dub.json.base > dub.json.ver" % self.semver,
+                "jq '. += {\"version\": \"%{version}\"}' dub.json.base > dub.json.ver",
                 "jq 'walk(if type == \"object\" then with_entries(select(.key | test(\"preBuildCommands*\") | not)) else . end)' dub.json.ver > dub.json",
                 ""
             ]))

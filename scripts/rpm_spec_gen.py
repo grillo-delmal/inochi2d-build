@@ -13,7 +13,11 @@ removed_deps = ['openssl-static']
 def find_deps(parent, dep_graph):
     deps = set(dep_graph[parent]['dependencies'])
     for name in dep_graph[parent]['dependencies']:
-        deps = deps.union(find_deps(name, dep_graph))
+        if name in dep_graph:
+            deps = deps.union(find_deps(name, dep_graph))
+        else:
+            deps.remove(name)
+            dep_graph[parent]['dependencies'].remove(name)
     return deps
 
 data = {}
