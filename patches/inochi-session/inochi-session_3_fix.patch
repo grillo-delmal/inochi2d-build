@@ -1,0 +1,40 @@
+diff --git a/dub.sdl b/dub.sdl
+index 0827679..58dde5c 100644
+--- a/dub.sdl
++++ b/dub.sdl
+@@ -18,6 +18,7 @@ copyFiles "res/licenses/*"
+ 
+ dflags "-mscrtlib=msvcrt" platform="windows-ldc"
+ lflags "-rpath=$$ORIGIN" platform="linux"
++lflags "-lz" platform="linux"
+ versions "GL_32" "USE_SDL2" "USE_GL" "SDL_2020" "USE_OpenGL3"
+ stringImportPaths "res"
+ 
+diff --git a/source/session/panels/scene.d b/source/session/panels/scene.d
+index 0556f9c..d6384b1 100644
+--- a/source/session/panels/scene.d
++++ b/source/session/panels/scene.d
+@@ -89,8 +89,8 @@ protected:
+ 
+             uiImIndent();
+                 const(char)* lightDirName = "###LIGHT_DIR";
+-                if (igSliderFloat3(lightDirName, &inSceneLightDirection.vector, -1, 1)) {
+-                    inSettingsSet!(float[3])("lightDir", inSceneLightDirection.vector);
++                if (igSliderFloat3(lightDirName, &inSceneLightDir.vector, -1, 1)) {
++                    inSettingsSet!(float[3])("lightDir", inSceneLightDir.vector);
+                 }
+             uiImUnindent();
+         uiImUnindent();
+diff --git a/source/session/scene/package.d b/source/session/scene/package.d
+index d274b25..4bc90ef 100644
+--- a/source/session/scene/package.d
++++ b/source/session/scene/package.d
+@@ -225,7 +225,7 @@ void insSceneInit() {
+     inSceneLightColor.vector = lightColor;
+ 
+     float[3] lightDir = inSettingsGet!(float[3])("lightDir", [1, 1, 1]);
+-    inSceneLightDirection.vector = lightDir;
++    inSceneLightDir.vector = lightDir;
+ 
+     float[4] bgColor = inSettingsGet!(float[4])("bgColor", [0, 0, 0, 0]);
+     inSetClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);

@@ -1,0 +1,32 @@
+diff --git a/dub.sdl b/dub.sdl
+index 2ccf86e..fbc84bc 100644
+--- a/dub.sdl
++++ b/dub.sdl
+@@ -13,12 +13,12 @@ dependency "dcv:core" version="~>0.3.0"
+ dependency "i18n-d" version="~>1.0.2"
+ dependency "i2d-imgui" version="~>0.8.0"
+ dependency "inochi2d" version="~>0.8.7"
+-dependency "mir-linux-kernel" version="~>1.0.1"
++dependency "mir-linux-kernel" version="~>1.2.1"
+ targetPath "out/"
+ workingDirectory "out/"
+ dflags "-mscrtlib=msvcrt" platform="windows-ldc"
+-dflags "-link-defaultlib-shared=false" platform="linux-ldc"
+ lflags "-rpath=$$ORIGIN" platform="linux"
++lflags "-lz" platform="linux"
+ versions "GL_32" "USE_SDL2" "SDL_2020" "UseUIScaling"
+ stringImportPaths "res/" "./"
+ 
+diff --git a/source/creator/panels/scene.d b/source/creator/panels/scene.d
+index 735029a..01d0df6 100644
+--- a/source/creator/panels/scene.d
++++ b/source/creator/panels/scene.d
+@@ -42,7 +42,7 @@ protected:
+ 
+         igSliderFloat3(
+             __("Light Direction"),
+-            cast(float[3]*)inSceneLightDirection.ptr,
++            cast(float[3]*)inSceneLightDir.ptr,
+             -1, 1
+         );
+     }

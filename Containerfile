@@ -1,11 +1,12 @@
-FROM quay.io/fedora/fedora:41
+FROM quay.io/fedora/fedora:42
 
 # Base stuff
 RUN dnf -y install \
         git \
         rsync \
         patch \
-        jq
+        jq \
+        awk
 
 # Install deps
 RUN dnf -y install \
